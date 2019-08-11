@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">GuantesApp</string>
+    <string-array name="modelos_guantes">
+        <item></item>
+        <item>Flash</item>
+        <item>Blast</item>
+        <item>Striker</item>
+        <item>Evolution</item>
+        <item>Premiere</item>
+        <item>Profesional</item>
+        <item>Guardiano</item>
+    </string-array>
+    <string-array name="tallas_guantes">
+        <item>----------</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+</resources>
