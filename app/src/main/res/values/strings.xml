@@ -6,12 +6,14 @@
         <item>Blast</item>
         <item>Striker</item>
         <item>Evolution</item>
+        <item>Warrior</item>
+        <item>Defender</item>
         <item>Premiere</item>
         <item>Profesional</item>
         <item>Guardiano</item>
     </string-array>
     <string-array name="tallas_guantes">
-        <item>----------</item>
+        <item></item>
         <item>4</item>
         <item>5</item>
         <item>6</item>

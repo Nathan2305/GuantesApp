@@ -11,11 +11,19 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     Spinner sp_modelo, sp_talla;
     FloatingActionButton fab_add, fab_add_stock, fab_add_photo;
-    ArrayAdapter<CharSequence> adapter_modelos;
+    public static String[] modelos;
+
     ArrayAdapter<CharSequence> adapter_tallas;
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     boolean isOpen = false;
@@ -24,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Backendless.initApp(getApplicationContext(), "99E9488F-BC72-1A42-FF41-2FAF16A97300", "D3A5917F-FC73-9C1C-FFBB-41FAF04BD300");
         sp_modelo = findViewById(R.id.sp_modelo);
         sp_talla = findViewById(R.id.sp_talla);
         fab_add = findViewById(R.id.fab_add);
@@ -34,10 +43,25 @@ public class MainActivity extends AppCompatActivity {
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
         rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
+        Backendless.Data.of(Modelo.class).find(new AsyncCallback<List<Modelo>>() {
+            @Override
+            public void handleResponse(List<Modelo> response) {
+                if (!response.isEmpty()) {
+                    modelos= new String[response.size()];
+                    for (int k = 0; k < response.size(); k++) {
+                        modelos[k] = response.get(k).getNombre();
+                    }
+                    ArrayAdapter<String> adapter_modelos= new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, modelos);
+                    adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    sp_modelo.setAdapter(adapter_modelos);
+                }
+            }
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                Toast.makeText(getApplicationContext(),"Algo salió mal.." + fault.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
 
-        adapter_modelos = ArrayAdapter.createFromResource(this, R.array.modelos_guantes, android.R.layout.simple_spinner_item);
-        adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sp_modelo.setAdapter(adapter_modelos);
 
         adapter_tallas = ArrayAdapter.createFromResource(this, R.array.tallas_guantes, android.R.layout.simple_spinner_item);
         adapter_tallas.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

@@ -18,12 +18,20 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.files.BackendlessFile;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,22 +39,32 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.example.guantesapp.AgregarStock.REQUEST_IMAGE_GALLERY;
+import static com.example.guantesapp.MainActivity.modelos;
 
 public class AgregarImagen extends AppCompatActivity {
 
     ImageView foto_guante;
     Button btn_save;
-    EditText id_foto;
+    Spinner name_foto;
     String pathImage;
     boolean imageEmpty = true;
+    Bitmap selectedImage;
+    public static final String pathRemote = "ModelosGuantes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_imagen);
+        name_foto = findViewById(R.id.name_foto);
+        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, modelos);
+        adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        name_foto.setAdapter(adapter_modelos);
+        name_foto.setBackgroundColor(getResources().getColor(R.color.naranaja));
+
+
         foto_guante = findViewById(R.id.foto_guante);
         btn_save = findViewById(R.id.btn_save);
-        id_foto = findViewById(R.id.id_foto);
+        name_foto = findViewById(R.id.name_foto);
         foto_guante.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,58 +75,43 @@ public class AgregarImagen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (!imageEmpty) {
-                    try {
-                        String idFoto = id_foto.getText().toString();
-                        FileInputStream fileInputStream = new FileInputStream(pathImage);
-                        if (!idFoto.isEmpty() && fileInputStream != null) {
-                            byte[] imgbyte = new byte[fileInputStream.available()];
-                            fileInputStream.read(imgbyte);
-                            Foto foto = new Foto();
-                            foto.setId_foto(idFoto.toLowerCase());
-                            foto.setImg(imgbyte);
-                            new TaskAddFoto().execute(foto);
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Debes ingresar Id de la imagen...", Toast.LENGTH_SHORT).show();
+                    File fileToUpload = new File(pathImage);
+                    Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
+                        @Override
+                        public void handleResponse(BackendlessFile response) {
+                            Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
+                            Imagen imagen=new Imagen();
+                            String nameFoto=name_foto.getSelectedItem().toString();
+                            imagen.setFoto(response.getFileURL());
+                            imagen.setModelo(nameFoto);
+                            Backendless.Data.of(Imagen.class).save(imagen, new AsyncCallback<Imagen>() {
+                                @Override
+                                public void handleResponse(Imagen response) {
+                                    Toast.makeText(getApplicationContext(), "Se guardó Imagen correctamente", Toast.LENGTH_LONG).show();
+                                    foto_guante.setImageResource(R.drawable.ic_add_photo);
+                                }
+
+                                @Override
+                                public void handleFault(BackendlessFault fault) {
+                                    Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen..",
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
                         }
-                    } catch (Exception e) {
-                        System.out.println("Error guardando imagen " + e.getMessage());
-                    }
-                } else {
-                    Toast.makeText(getApplicationContext(), "Debes cargar una imagen...", Toast.LENGTH_SHORT).show();
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la foto..",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
 
             }
         });
+
     }
 
-    public class TaskAddFoto extends AsyncTask<Foto, Void, Void> {
-        boolean resul = false;
-        @Override
-        protected Void doInBackground(Foto... fotos) {
-            try {
-                Foto auxFoto = AppDataBase.getInstanceFotoBD(getApplicationContext()).getFotoDao().existPKFoto(fotos[0].getId_foto());
-                if (auxFoto == null) {
-                    AppDataBase.getInstanceFotoBD(getApplicationContext()).getFotoDao().insertFoto(fotos);
-                    resul = true;
-                }
-            } catch (Exception e) {
-                System.out.println("Excepcion saving foto.." + e.getMessage());
-            }
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (resul) {
-                Toast.makeText(getApplicationContext(), "Foto saved properly...", Toast.LENGTH_SHORT).show();
-                foto_guante.setImageResource(R.drawable.ic_add_photo);
-                id_foto.setText("");
-                imageEmpty = true;
-            } else {
-                Toast.makeText(getApplicationContext(), "Foto already exist...Not Uploaded", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 
     private void checkPermissionGallery() {
         if (ContextCompat.checkSelfPermission(this,
@@ -149,7 +152,7 @@ public class AgregarImagen extends AppCompatActivity {
                     pathImage = getPath(imageUri);
                     InputStream imageStream = getContentResolver().openInputStream(imageUri);
                     //Bitmap selectedImage = cropBitmap(BitmapFactory.decodeStream(imageStream));
-                    Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                    selectedImage = BitmapFactory.decodeStream(imageStream);
                     foto_guante.setImageBitmap(selectedImage);
                     imageEmpty = false;
                 } catch (Exception e) {

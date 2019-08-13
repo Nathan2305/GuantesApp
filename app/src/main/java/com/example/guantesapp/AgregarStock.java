@@ -45,7 +45,7 @@ public class AgregarStock extends AppCompatActivity {
         rec_fotos = findViewById(R.id.rec_fotos);
         layoutManager = new LinearLayoutManager(getApplicationContext());
         ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
-        cantidad = findViewById(R.id.cantidad);
+        //cantidad = findViewById(R.id.cantidad);
         adapter_modelos = ArrayAdapter.createFromResource(this, R.array.modelos_guantes, android.R.layout.simple_spinner_item);
         adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_modelo2.setAdapter(adapter_modelos);
@@ -59,7 +59,6 @@ public class AgregarStock extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String modelo = ((String) parent.getItemAtPosition(position));
                 if (!modelo.isEmpty()) {
-                    showModelsPerPkFoto(modelo);
                 }
             }
 
@@ -70,9 +69,6 @@ public class AgregarStock extends AppCompatActivity {
         });
     }
 
-    private void showModelsPerPkFoto(String modelo) {
-        new TaskFindModelsPerFotoPk().execute(modelo);
-    }
 
 
     @Override
@@ -95,42 +91,6 @@ public class AgregarStock extends AppCompatActivity {
         startActivityForResult(pickPhotoIntent, REQUEST_IMAGE_GALLERY);
     }
 
-    public class TaskFindModelsPerFotoPk extends AsyncTask<String, Void, Void> {
-        boolean isThereFotos = false;
-        List<Foto> fotoList;
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                List<Foto> foundFotos = AppDataBase.getInstanceFotoBD(getApplicationContext()).getFotoDao().getAllFoto();
-                if (!foundFotos.isEmpty()) {
-                    fotoList = new ArrayList<>();
-                    for (Foto eachFoto : foundFotos) {
-                        if (eachFoto.getId_foto().contains(strings[0].toLowerCase())) {
-                            fotoList.add(eachFoto);
-                        }
-                    }
-                    isThereFotos = true;
-                }
-            } catch (Exception e) {
-                System.out.println("Error getting allFotos..." + e.getMessage());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (isThereFotos) {
-                Toast.makeText(getApplicationContext(), "Se encontraron fotos", Toast.LENGTH_SHORT).show();
-                adapter = new CustomAdapterforFotos(getApplicationContext(), fotoList);
-                rec_fotos.setLayoutManager(layoutManager);
-                rec_fotos.setHasFixedSize(true);
-                rec_fotos.setAdapter(adapter);
-            } else {
-                Toast.makeText(getApplicationContext(), "No se encontraron fotos", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 
 }
