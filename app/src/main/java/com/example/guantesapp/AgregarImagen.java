@@ -80,8 +80,8 @@ public class AgregarImagen extends AppCompatActivity {
                         @Override
                         public void handleResponse(BackendlessFile response) {
                             Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
-                            Imagen imagen=new Imagen();
-                            String nameFoto=name_foto.getSelectedItem().toString();
+                            Imagen imagen = new Imagen();
+                            String nameFoto = name_foto.getSelectedItem().toString();
                             imagen.setFoto(response.getFileURL());
                             imagen.setModelo(nameFoto);
                             Backendless.Data.of(Imagen.class).save(imagen, new AsyncCallback<Imagen>() {
@@ -105,6 +105,9 @@ public class AgregarImagen extends AppCompatActivity {
                                     Toast.LENGTH_LONG).show();
                         }
                     });
+                } else {
+                    Toast.makeText(getApplicationContext(), "Seleccion una imagen...",
+                            Toast.LENGTH_SHORT).show();
                 }
 
             }

@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
+import it.sephiroth.android.library.picasso.Picasso;
+
 public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterforFotos.ViewHolder> {
     Context context;
     List<Imagen> fotoList;
@@ -31,13 +33,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
 
     @Override
     public void onBindViewHolder(@NonNull CustomAdapterforFotos.ViewHolder viewHolder, int i) {
-       /* byte[] imageByteArray = fotoList.get(i).getImg();
-        if (imageByteArray != null) {
-            ByteArrayInputStream imageStream = new ByteArrayInputStream(imageByteArray);
-            Bitmap company_logo = BitmapFactory.decodeStream(imageStream);
-            //Util.resizePicasso(context, Uri.parse(photoList.get(i).getPath()),company_logo,viewHolder.img);
-           viewHolder.found_fotos.setBackgroundDrawable(new BitmapDrawable(context.getResources(), company_logo));
-        }*/
+        Picasso.with(this.context).load(fotoList.get(i).getFoto()).into(viewHolder.found_fotos);
     }
 
     @Override

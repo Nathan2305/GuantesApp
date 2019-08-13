@@ -21,14 +21,21 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.BackendlessDataQuery;
+import com.backendless.persistence.DataQueryBuilder;
+
 import java.io.File;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.guantesapp.MainActivity.modelos;
+
 public class AgregarStock extends AppCompatActivity {
     Spinner sp_modelo2, sp_talla2;
-    ArrayAdapter<CharSequence> adapter_modelos;
     ArrayAdapter<CharSequence> adapter_tallas;
     static int REQUEST_IMAGE_GALLERY = 100;
     RecyclerView rec_fotos;
@@ -46,7 +53,7 @@ public class AgregarStock extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(getApplicationContext());
         ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
         //cantidad = findViewById(R.id.cantidad);
-        adapter_modelos = ArrayAdapter.createFromResource(this, R.array.modelos_guantes, android.R.layout.simple_spinner_item);
+        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, modelos);
         adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_modelo2.setAdapter(adapter_modelos);
 
@@ -59,8 +66,10 @@ public class AgregarStock extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String modelo = ((String) parent.getItemAtPosition(position));
                 if (!modelo.isEmpty()) {
+                    showModelos(modelo);
                 }
             }
+
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -69,6 +78,26 @@ public class AgregarStock extends AppCompatActivity {
         });
     }
 
+    private void showModelos(String modelo) {
+        DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+        queryBuilder.setWhereClause("modelo='" + modelo + "'");
+        Backendless.Data.of(Imagen.class).find(queryBuilder, new AsyncCallback<List<Imagen>>() {
+            @Override
+            public void handleResponse(List<Imagen> response) {
+                if (!response.isEmpty()) {
+                    adapter = new CustomAdapterforFotos(getApplicationContext(), response);
+                    rec_fotos.setLayoutManager(layoutManager);
+                    rec_fotos.setHasFixedSize(true);
+                    rec_fotos.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+            Toast.makeText(getApplicationContext(),"Error getting fotos..",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
 
     @Override
@@ -90,7 +119,6 @@ public class AgregarStock extends AppCompatActivity {
         pickPhotoIntent.setDataAndType(data, "image/*");
         startActivityForResult(pickPhotoIntent, REQUEST_IMAGE_GALLERY);
     }
-
 
 
 }
