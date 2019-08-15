@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -30,6 +31,8 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,17 +52,20 @@ public class AgregarImagen extends AppCompatActivity {
     String pathImage;
     boolean imageEmpty = true;
     Bitmap selectedImage;
+    ProgressBar progress;
     public static final String pathRemote = "ModelosGuantes";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_imagen);
+        progress=findViewById(R.id.progress);
+        Sprite doubleBounce = new FadingCircle();
+        progress.setProgressDrawable(doubleBounce);
         name_foto = findViewById(R.id.name_foto);
-        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, modelos);
+        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,modelos);
         adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         name_foto.setAdapter(adapter_modelos);
-        name_foto.setBackgroundColor(getResources().getColor(R.color.naranaja));
 
 
         foto_guante = findViewById(R.id.foto_guante);
@@ -75,6 +81,7 @@ public class AgregarImagen extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (!imageEmpty) {
+                    progress.setVisibility(View.VISIBLE);
                     File fileToUpload = new File(pathImage);
                     Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
                         @Override
@@ -88,21 +95,24 @@ public class AgregarImagen extends AppCompatActivity {
                                 @Override
                                 public void handleResponse(Imagen response) {
                                     Toast.makeText(getApplicationContext(), "Se guardó Imagen correctamente", Toast.LENGTH_LONG).show();
-                                    foto_guante.setImageResource(R.drawable.ic_add_photo);
+                                    foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
+                                    progress.setVisibility(View.GONE);
                                 }
 
                                 @Override
                                 public void handleFault(BackendlessFault fault) {
-                                    Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen..",
+                                    Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen.." + fault.getMessage(),
                                             Toast.LENGTH_LONG).show();
+                                    progress.setVisibility(View.GONE);
                                 }
                             });
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
-                            Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la foto..",
+                            Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la foto.."+fault.getMessage(),
                                     Toast.LENGTH_LONG).show();
+                            progress.setVisibility(View.GONE);
                         }
                     });
                 } else {

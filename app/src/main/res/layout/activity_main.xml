@@ -66,10 +66,10 @@
                         android:text="Modelo" />
 
                     <Spinner
-
                         android:id="@+id/sp_modelo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        style="@style/mySpinner"
                         android:textAlignment="center"></Spinner>
                 </LinearLayout>
 
@@ -110,7 +110,6 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:backgroundTint="@color/naranaja"
-
         android:clickable="true"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/fab_add"
@@ -119,7 +118,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/fab_add"
         app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@mipmap/ic_launcher" />
+        android:src="@drawable/ic_cloud_upload_black_24dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_stock"
@@ -128,7 +127,6 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:backgroundTint="@color/celeste"
-
         android:clickable="true"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/fab_add"
@@ -137,7 +135,7 @@
         app:layout_constraintStart_toEndOf="@+id/fab_add"
         app:layout_constraintTop_toTopOf="@+id/fab_add"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@mipmap/modelo" />
+       android:src="@drawable/ic_add_stock" />
 
 
 </android.support.constraint.ConstraintLayout>

@@ -1,14 +1,12 @@
 package com.example.guantesapp;
 
-import android.Manifest;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,44 +14,41 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.BackendlessDataQuery;
 import com.backendless.persistence.DataQueryBuilder;
-
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.FadingCircle;
 import java.io.File;
-import java.security.Permission;
-import java.util.ArrayList;
 import java.util.List;
-
 import static com.example.guantesapp.MainActivity.modelos;
 
 public class AgregarStock extends AppCompatActivity {
     Spinner sp_modelo2, sp_talla2;
     ArrayAdapter<CharSequence> adapter_tallas;
     static int REQUEST_IMAGE_GALLERY = 100;
+    ProgressBar progressBar;
     RecyclerView rec_fotos;
     RecyclerView.LayoutManager layoutManager;
     RecyclerView.Adapter adapter;
-    EditText cantidad;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_stock);
+        progressBar=findViewById(R.id.progress);
+        Sprite doubleBounce = new FadingCircle();
+        progressBar.setProgressDrawable(doubleBounce);
         sp_modelo2 = findViewById(R.id.sp_modelo2);
         sp_talla2 = findViewById(R.id.sp_talla2);
         rec_fotos = findViewById(R.id.rec_fotos);
         layoutManager = new LinearLayoutManager(getApplicationContext());
         ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
-        //cantidad = findViewById(R.id.cantidad);
-        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, modelos);
+        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,modelos);
         adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_modelo2.setAdapter(adapter_modelos);
 
@@ -66,10 +61,10 @@ public class AgregarStock extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String modelo = ((String) parent.getItemAtPosition(position));
                 if (!modelo.isEmpty()) {
+                    progressBar.setVisibility(View.VISIBLE);
                     showModelos(modelo);
                 }
             }
-
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -78,7 +73,7 @@ public class AgregarStock extends AppCompatActivity {
         });
     }
 
-    private void showModelos(String modelo) {
+    private void showModelos(final String modelo) {
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
         queryBuilder.setWhereClause("modelo='" + modelo + "'");
         Backendless.Data.of(Imagen.class).find(queryBuilder, new AsyncCallback<List<Imagen>>() {
@@ -89,6 +84,10 @@ public class AgregarStock extends AppCompatActivity {
                     rec_fotos.setLayoutManager(layoutManager);
                     rec_fotos.setHasFixedSize(true);
                     rec_fotos.setAdapter(adapter);
+                    progressBar.setVisibility(View.GONE);
+                }else{
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getApplicationContext(),"No hay modelos "+ modelo +" aún",Toast.LENGTH_LONG).show();
                 }
             }
 

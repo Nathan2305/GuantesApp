@@ -4,5 +4,8 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="naranaja">#F8970A</color>
+    <color name="celesteClaro">#AAE4F8</color>
     <color name="celeste">#84C8FC</color>
+    <color name="translucent">#0000ffff</color>
+
 </resources>

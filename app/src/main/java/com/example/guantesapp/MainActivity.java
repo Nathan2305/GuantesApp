@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
         fab_add = findViewById(R.id.fab_add);
         fab_add_stock = findViewById(R.id.fab_add_stock);
         fab_add_photo = findViewById(R.id.fab_add_photo);
-
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
@@ -47,18 +46,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleResponse(List<Modelo> response) {
                 if (!response.isEmpty()) {
-                    modelos= new String[response.size()];
+                    modelos = new String[response.size()];
                     for (int k = 0; k < response.size(); k++) {
                         modelos[k] = response.get(k).getNombre();
                     }
-                    ArrayAdapter<String> adapter_modelos= new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, modelos);
+                    ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,modelos);
                     adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     sp_modelo.setAdapter(adapter_modelos);
                 }
             }
+
             @Override
             public void handleFault(BackendlessFault fault) {
-                Toast.makeText(getApplicationContext(),"Algo salió mal.." + fault.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Algo salió mal.." + fault.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
