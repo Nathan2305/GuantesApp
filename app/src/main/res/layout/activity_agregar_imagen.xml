@@ -18,9 +18,9 @@
 
         <ImageView
             android:id="@+id/foto_guante"
-            android:layout_margin="20dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_margin="20dp"
             android:src="@drawable/ic_cloud_upload_black_24dp" />
     </LinearLayout>
 
@@ -47,6 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center"
                 android:text="Modelo"
                 android:textSize="18sp" />
 
