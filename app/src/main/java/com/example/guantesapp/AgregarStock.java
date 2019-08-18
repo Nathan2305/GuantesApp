@@ -71,6 +71,8 @@ public class AgregarStock extends AppCompatActivity {
 
             }
         });
+
+
     }
 
     private void showModelos(final String modelo) {
@@ -85,6 +87,13 @@ public class AgregarStock extends AppCompatActivity {
                     rec_fotos.setHasFixedSize(true);
                     rec_fotos.setAdapter(adapter);
                     progressBar.setVisibility(View.GONE);
+                    ((CustomAdapterforFotos)adapter).setOnItemClickListener(new CustomAdapterforFotos.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(int position) {
+
+                        }
+                    });
+
                 }else{
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(),"No hay modelos "+ modelo +" aún",Toast.LENGTH_LONG).show();
