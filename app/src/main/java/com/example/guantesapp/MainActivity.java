@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Backendless.initApp(getApplicationContext(), "99E9488F-BC72-1A42-FF41-2FAF16A97300", "D3A5917F-FC73-9C1C-FFBB-41FAF04BD300");
+        Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
         sp_modelo = findViewById(R.id.sp_modelo);
         sp_talla = findViewById(R.id.sp_talla);
         fab_add = findViewById(R.id.fab_add);
@@ -53,9 +53,10 @@ public class MainActivity extends AppCompatActivity {
                     ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,modelos);
                     adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     sp_modelo.setAdapter(adapter_modelos);
+                }else{
+                    Toast.makeText(getApplicationContext(), "No se han agredado modelos aún", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void handleFault(BackendlessFault fault) {
                 Toast.makeText(getApplicationContext(), "Algo salió mal.." + fault.getMessage(), Toast.LENGTH_SHORT).show();

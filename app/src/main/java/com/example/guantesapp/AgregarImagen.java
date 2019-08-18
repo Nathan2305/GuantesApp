@@ -6,25 +6,26 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
@@ -34,11 +35,7 @@ import com.backendless.files.BackendlessFile;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 
 import static com.example.guantesapp.AgregarStock.REQUEST_IMAGE_GALLERY;
@@ -48,9 +45,12 @@ public class AgregarImagen extends AppCompatActivity {
 
     ImageView foto_guante;
     Button btn_save;
-    Spinner name_foto;
+    Spinner spinnerModelo;
     String pathImage;
+    CheckBox checkNuevo;
     boolean imageEmpty = true;
+    TextView textViewNuevo;
+    EditText nuevoModelo;
     Bitmap selectedImage;
     ProgressBar progress;
     public static final String pathRemote = "ModelosGuantes";
@@ -59,22 +59,42 @@ public class AgregarImagen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_imagen);
-        progress=findViewById(R.id.progress);
+        checkNuevo = findViewById(R.id.checkNuevo);
+        textViewNuevo = findViewById(R.id.textViewNuevo);
+        nuevoModelo = findViewById(R.id.nuevoModelo);
+        progress = findViewById(R.id.progress);
         Sprite doubleBounce = new FadingCircle();
         progress.setProgressDrawable(doubleBounce);
-        name_foto = findViewById(R.id.name_foto);
-        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item,modelos);
-        adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        name_foto.setAdapter(adapter_modelos);
-
+        spinnerModelo = findViewById(R.id.name_foto);
+        if (modelos != null) {
+            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, modelos);
+            adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerModelo.setAdapter(adapter_modelos);
+        }
 
         foto_guante = findViewById(R.id.foto_guante);
         btn_save = findViewById(R.id.btn_save);
-        name_foto = findViewById(R.id.name_foto);
+        spinnerModelo = findViewById(R.id.name_foto);
         foto_guante.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkPermissionGallery();
+            }
+        });
+        checkNuevo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    textViewNuevo.setVisibility(View.VISIBLE);
+                    nuevoModelo.setVisibility(View.VISIBLE);
+                    spinnerModelo.setEnabled(false);
+                    spinnerModelo.setClickable(false);
+                } else {
+                    textViewNuevo.setVisibility(View.GONE);
+                    nuevoModelo.setVisibility(View.GONE);
+                    spinnerModelo.setEnabled(true);
+                    spinnerModelo.setClickable(true);
+                }
             }
         });
         btn_save.setOnClickListener(new View.OnClickListener() {
@@ -82,39 +102,64 @@ public class AgregarImagen extends AppCompatActivity {
             public void onClick(View v) {
                 if (!imageEmpty) {
                     progress.setVisibility(View.VISIBLE);
+                    final String nameFoto;
                     File fileToUpload = new File(pathImage);
-                    Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
-                        @Override
-                        public void handleResponse(BackendlessFile response) {
-                            Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
-                            Imagen imagen = new Imagen();
-                            String nameFoto = name_foto.getSelectedItem().toString();
-                            imagen.setFoto(response.getFileURL());
-                            imagen.setModelo(nameFoto);
-                            Backendless.Data.of(Imagen.class).save(imagen, new AsyncCallback<Imagen>() {
-                                @Override
-                                public void handleResponse(Imagen response) {
-                                    Toast.makeText(getApplicationContext(), "Se guardó Imagen correctamente", Toast.LENGTH_LONG).show();
-                                    foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
-                                    progress.setVisibility(View.GONE);
-                                }
+                    if (!checkNuevo.isChecked()) {
+                        nameFoto = spinnerModelo.getSelectedItem().toString();
+                    } else {
+                        nameFoto = nuevoModelo.getText().toString();
+                    }
+                    if (!nameFoto.isEmpty()) {
+                        Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
+                            @Override
+                            public void handleResponse(BackendlessFile response) {
+                                Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
+                                Imagen imagen = new Imagen();
+                                imagen.setFoto(response.getFileURL());
+                                imagen.setModelo(nameFoto);
+                                Backendless.Data.of(Imagen.class).save(imagen, new AsyncCallback<Imagen>() {
+                                    @Override
+                                    public void handleResponse(Imagen response) {
+                                        Toast.makeText(getApplicationContext(), "Se guardó Imagen correctamente", Toast.LENGTH_LONG).show();
+                                        Modelo modelo = new Modelo();
+                                        modelo.setNombre(nameFoto);
+                                        Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
+                                            @Override
+                                            public void handleResponse(Modelo response) {
+                                                Toast.makeText(getApplicationContext(), "Se guardó en Tabla Modelo correctamente", Toast.LENGTH_LONG).show();
+                                                foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
+                                                progress.setVisibility(View.GONE);
+                                            }
 
-                                @Override
-                                public void handleFault(BackendlessFault fault) {
-                                    Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen.." + fault.getMessage(),
-                                            Toast.LENGTH_LONG).show();
-                                    progress.setVisibility(View.GONE);
-                                }
-                            });
-                        }
+                                            @Override
+                                            public void handleFault(BackendlessFault fault) {
+                                                Toast.makeText(getApplicationContext(), "No se guardó en Tabla Modelo correctamente", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                                    }
 
-                        @Override
-                        public void handleFault(BackendlessFault fault) {
-                            Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la foto.."+fault.getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                            progress.setVisibility(View.GONE);
-                        }
-                    });
+                                    @Override
+                                    public void handleFault(BackendlessFault fault) {
+                                        Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen.." + fault.getMessage(),
+                                                Toast.LENGTH_LONG).show();
+                                        progress.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault fault) {
+                                Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la foto.." + fault.getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                                progress.setVisibility(View.GONE);
+                            }
+                        });
+
+                    } else {
+                        Utils.showToast(getApplicationContext(), "Ingresa el nombre del modelo...");
+                        progress.setVisibility(View.GONE);
+                    }
+
                 } else {
                     Toast.makeText(getApplicationContext(), "Seleccion una imagen...",
                             Toast.LENGTH_SHORT).show();
