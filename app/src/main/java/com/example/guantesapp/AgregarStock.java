@@ -27,7 +27,9 @@ import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.guantesapp.MainActivity.modelos;
 
@@ -95,7 +97,7 @@ public class AgregarStock extends AppCompatActivity {
                     if (!fotosChecked.isEmpty()) {
                         String talla = (String) spinnerTalla.getSelectedItem();
                         String cantidad = (String) spinnerCantidad.getSelectedItem();
-                        addStock(modelo, talla, cantidad, fotosChecked);
+                        addStock(modelo, talla, Integer.parseInt(cantidad), fotosChecked);
                     } else {
                         Toast.makeText(getApplicationContext(), "Selecciona un modelo", Toast.LENGTH_SHORT).show();
                     }
@@ -124,7 +126,6 @@ public class AgregarStock extends AppCompatActivity {
 
                         }
                     });
-
                 } else {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), "No hay modelos " + modelo + " aún", Toast.LENGTH_LONG).show();
@@ -160,33 +161,17 @@ public class AgregarStock extends AppCompatActivity {
         startActivityForResult(pickPhotoIntent, REQUEST_IMAGE_GALLERY);
     }
 
-    private void addStock(final String modelo, final String talla, final String cantidad, List<String> fotosChecked) {
+    private void addStock(final String modelo, final String talla, final int cantidad, final List<String> fotosChecked) {
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-        queryBuilder.setWhereClause("modelo='" + modelo + "'");
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("nombre='" + modelo + "'");
+        queryBuilder.setWhereClause(stringBuffer.toString());
         Backendless.Data.of(Modelo.class).find(queryBuilder, new AsyncCallback<List<Modelo>>() {
             @Override
             public void handleResponse(List<Modelo> response) {
-                if (response == null) {
-                    //No existe el modelo, entonce se añade
-                    Modelo obj_modelo = new Modelo();
-                    obj_modelo.setNombre(modelo);
-                    obj_modelo.setCantidad(Integer.parseInt(cantidad));
-                    obj_modelo.setTalla(talla);
-                    Backendless.Data.of(Modelo.class).save(obj_modelo, new AsyncCallback<Modelo>() {
-                        @Override
-                        public void handleResponse(Modelo response) {
-                            Toast.makeText(getApplicationContext(), "Se añadió nuevo modelo :" + response.getNombre(), Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void handleFault(BackendlessFault fault) {
-                            Toast.makeText(getApplicationContext(), "No se añadio modelo ", Toast.LENGTH_SHORT).show();
-
-                        }
-                    });
-                } else {
-
-                }
+                    if (!response.isEmpty()){
+                        Modelo foundModelo=response.get(0);
+                    }
             }
 
             @Override
@@ -194,6 +179,7 @@ public class AgregarStock extends AppCompatActivity {
 
             }
         });
+
     }
 
 }

@@ -37,6 +37,8 @@ import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.guantesapp.AgregarStock.REQUEST_IMAGE_GALLERY;
 import static com.example.guantesapp.MainActivity.modelos;
@@ -113,31 +115,31 @@ public class AgregarImagen extends AppCompatActivity {
                         Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
                             @Override
                             public void handleResponse(BackendlessFile response) {
-                                Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
-                                Imagen imagen = new Imagen();
+                                //Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
+                                final Imagen imagen = new Imagen();
                                 imagen.setFoto(response.getFileURL());
                                 imagen.setModelo(nameFoto);
                                 Backendless.Data.of(Imagen.class).save(imagen, new AsyncCallback<Imagen>() {
                                     @Override
                                     public void handleResponse(Imagen response) {
-                                        Toast.makeText(getApplicationContext(), "Se guardó Imagen correctamente", Toast.LENGTH_LONG).show();
-                                        Modelo modelo = new Modelo();
+                                        final Modelo modelo = new Modelo();
                                         modelo.setNombre(nameFoto);
                                         Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
                                             @Override
                                             public void handleResponse(Modelo response) {
-                                                Toast.makeText(getApplicationContext(), "Se guardó en Tabla Modelo correctamente", Toast.LENGTH_LONG).show();
-                                                foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
-                                                progress.setVisibility(View.GONE);
+                                                saveModeloChild(response,imagen);
                                             }
-
                                             @Override
                                             public void handleFault(BackendlessFault fault) {
-                                                Toast.makeText(getApplicationContext(), "No se guardó en Tabla Modelo correctamente", Toast.LENGTH_LONG).show();
+                                                if ("1155".equalsIgnoreCase(fault.getCode())) {
+                                                    saveModeloChild(modelo,imagen);
+                                                } else {
+                                                    Toast.makeText(getApplicationContext(), "No se creó el nuevo Modelo.", Toast.LENGTH_LONG).show();
+                                                    progress.setVisibility(View.GONE);
+                                                }
                                             }
                                         });
                                     }
-
                                     @Override
                                     public void handleFault(BackendlessFault fault) {
                                         Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen.." + fault.getMessage(),
@@ -165,6 +167,78 @@ public class AgregarImagen extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 }
 
+            }
+        });
+
+    }
+
+    private void saveModeloChild(final Modelo modelo,final Imagen imagen) {
+        Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+            @Override
+            public void handleResponse(List<ModeloChild> response) {
+                if (!response.isEmpty()) {
+                    int size = response.size();
+                    String nombreModeloChild = modelo.getNombre() + size;
+                    ModeloChild modeloChild = new ModeloChild();
+                    modeloChild.setNombre(nombreModeloChild);
+
+                    Backendless.Data.of(ModeloChild.class).save(modeloChild, new AsyncCallback<ModeloChild>() {
+                        @Override
+                        public void handleResponse(ModeloChild response) {
+                            setImageToModelChild(response,imagen);
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Toast.makeText(getApplicationContext(), "Algo salió mal hijo.." + fault.getMessage(),Toast.LENGTH_LONG).show();
+                            progress.setVisibility(View.GONE);
+                        }
+                    });
+                }else{
+                    String nombreModeloChild = modelo.getNombre();
+                    ModeloChild modeloChild = new ModeloChild();
+                    modeloChild.setNombre(nombreModeloChild);
+                    modeloChild.setImagen(imagen);
+                    Backendless.Data.of(ModeloChild.class).save(modeloChild, new AsyncCallback<ModeloChild>() {
+                        @Override
+                        public void handleResponse(ModeloChild response) {
+                           // Utils.showToast(getApplicationContext(),"Se guardó Hijo correctamente");
+                            setImageToModelChild(response,imagen);
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Toast.makeText(getApplicationContext(), "Algo salió mal hijo.." + fault.getMessage(),Toast.LENGTH_LONG).show();
+                            progress.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            }
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                Toast.makeText(getApplicationContext(), "Algo salió mal mal hijo.." + fault.getMessage(),Toast.LENGTH_LONG).show();
+                progress.setVisibility(View.GONE);
+            }
+        });
+
+    }
+
+    private void setImageToModelChild(ModeloChild modelChild,Imagen imagen) {
+        ArrayList<Imagen> list=new ArrayList<>();
+        list.add(imagen);
+        Backendless.Data.of(ModeloChild.class).setRelation(modelChild, "imagen", list, new AsyncCallback<Integer>() {
+            @Override
+            public void handleResponse(Integer response) {
+                Utils.showToast(getApplicationContext(),"Se guardó el modelo por completo!!....");
+                foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
+                progress.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                Utils.showToast(getApplicationContext(),"NO se guardó la relación ModeloChild-Imagen");
+                //foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
+                progress.setVisibility(View.GONE);
             }
         });
 

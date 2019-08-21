@@ -16,6 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility = '1.8'
+    }
 }
 
 dependencies {
@@ -30,5 +33,5 @@ dependencies {
     implementation 'com.backendless:backendless:5.1.0'
     implementation 'it.sephiroth.android.library.picasso:picasso:2.5.2.4b'
     implementation 'com.github.ybq:Android-SpinKit:1.4.0'
-
-}
+    implementation 'com.google.guava:guava:28.0-jre'
+  }

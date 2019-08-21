@@ -1,11 +1,14 @@
 package com.example.guantesapp;
 
 
+import java.util.List;
+
 public class Modelo {
 
     private String nombre;
     private String talla;
     private int cantidad;
+    private String imageUrl;
 
     public String getNombre() {
         return nombre;
@@ -29,5 +32,13 @@ public class Modelo {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
