@@ -112,56 +112,11 @@ public class AgregarImagen extends AppCompatActivity {
                         nameFoto = nuevoModelo.getText().toString();
                     }
                     if (!nameFoto.isEmpty()) {
-                        Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
-                            @Override
-                            public void handleResponse(BackendlessFile response) {
-                                //Toast.makeText(getApplicationContext(), "Se guardó foto correctamente -" + response.getFileURL(), Toast.LENGTH_LONG).show();
-                                final Imagen imagen = new Imagen();
-                                imagen.setFoto(response.getFileURL());
-                                imagen.setModelo(nameFoto);
-                                Backendless.Data.of(Imagen.class).save(imagen, new AsyncCallback<Imagen>() {
-                                    @Override
-                                    public void handleResponse(Imagen response) {
-                                        final Modelo modelo = new Modelo();
-                                        modelo.setNombre(nameFoto);
-                                        Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
-                                            @Override
-                                            public void handleResponse(Modelo response) {
-                                                saveModeloChild(response,imagen);
-                                            }
-                                            @Override
-                                            public void handleFault(BackendlessFault fault) {
-                                                if ("1155".equalsIgnoreCase(fault.getCode())) {
-                                                    saveModeloChild(modelo,imagen);
-                                                } else {
-                                                    Toast.makeText(getApplicationContext(), "No se creó el nuevo Modelo.", Toast.LENGTH_LONG).show();
-                                                    progress.setVisibility(View.GONE);
-                                                }
-                                            }
-                                        });
-                                    }
-                                    @Override
-                                    public void handleFault(BackendlessFault fault) {
-                                        Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la imagen.." + fault.getMessage(),
-                                                Toast.LENGTH_LONG).show();
-                                        progress.setVisibility(View.GONE);
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void handleFault(BackendlessFault fault) {
-                                Toast.makeText(getApplicationContext(), "Algo salió mal subiendo la foto.." + fault.getMessage(),
-                                        Toast.LENGTH_LONG).show();
-                                progress.setVisibility(View.GONE);
-                            }
-                        });
-
+                        saveImageFile(fileToUpload, pathRemote, nameFoto);
                     } else {
                         Utils.showToast(getApplicationContext(), "Ingresa el nombre del modelo...");
                         progress.setVisibility(View.GONE);
                     }
-
                 } else {
                     Toast.makeText(getApplicationContext(), "Seleccion una imagen...",
                             Toast.LENGTH_SHORT).show();
@@ -172,78 +127,100 @@ public class AgregarImagen extends AppCompatActivity {
 
     }
 
-    private void saveModeloChild(final Modelo modelo,final Imagen imagen) {
-        Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+    private void saveImageFile(File fileToUpload, String pathRemote, final String modelo) {
+        Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
             @Override
-            public void handleResponse(List<ModeloChild> response) {
-                if (!response.isEmpty()) {
-                    int size = response.size();
-                    String nombreModeloChild = modelo.getNombre() + size;
-                    ModeloChild modeloChild = new ModeloChild();
-                    modeloChild.setNombre(nombreModeloChild);
+            public void handleResponse(BackendlessFile response) {
+                saveModeloChild(response.getFileURL(), modelo);
+            }
 
-                    Backendless.Data.of(ModeloChild.class).save(modeloChild, new AsyncCallback<ModeloChild>() {
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                Toast.makeText(getApplicationContext(), "Algo salió mal subiendo FotoFile ...." + fault.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                progress.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void saveModeloChild(String imageUrl, final String nombre) {
+
+        final ModeloChild modeloChild = new ModeloChild();
+        modeloChild.setImagenUrl(imageUrl);
+
+        Modelo modeloPadre = new Modelo();
+        modeloPadre.setNombre(nombre);
+
+        Backendless.Data.of(Modelo.class).save(modeloPadre, new AsyncCallback<Modelo>() {
+            @Override
+            public void handleResponse(Modelo response) {
+
+                Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+                    @Override
+                    public void handleResponse(List<ModeloChild> response) {
+                        if (!response.isEmpty()) {
+                            int size = response.size();
+                            modeloChild.setNombre(nombre + size);
+                        } else {
+                            modeloChild.setNombre(nombre);
+                        }
+                        saveChildwithName(modeloChild);
+                    }
+
+                    @Override
+                    public void handleFault(BackendlessFault fault) {
+                        Utils.showToast(getApplicationContext(), "Algo salió mal buscando ModeloChild - " + fault.getMessage());
+                        progress.setVisibility(View.GONE);
+                    }
+                });
+            }
+
+            @Override
+            public void handleFault(BackendlessFault fault) {
+                if ("1155".equalsIgnoreCase(fault.getCode())){
+                    Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
                         @Override
-                        public void handleResponse(ModeloChild response) {
-                            setImageToModelChild(response,imagen);
+                        public void handleResponse(List<ModeloChild> response) {
+                            if (!response.isEmpty()) {
+                                int size = response.size();
+                                modeloChild.setNombre(nombre + size);
+                            } else {
+                                modeloChild.setNombre(nombre);
+                            }
+                            saveChildwithName(modeloChild);
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
-                            Toast.makeText(getApplicationContext(), "Algo salió mal hijo.." + fault.getMessage(),Toast.LENGTH_LONG).show();
+                            Utils.showToast(getApplicationContext(), "Algo salió mal buscando ModeloChild - " + fault.getMessage());
                             progress.setVisibility(View.GONE);
                         }
                     });
                 }else{
-                    String nombreModeloChild = modelo.getNombre();
-                    ModeloChild modeloChild = new ModeloChild();
-                    modeloChild.setNombre(nombreModeloChild);
-                    modeloChild.setImagen(imagen);
-                    Backendless.Data.of(ModeloChild.class).save(modeloChild, new AsyncCallback<ModeloChild>() {
-                        @Override
-                        public void handleResponse(ModeloChild response) {
-                           // Utils.showToast(getApplicationContext(),"Se guardó Hijo correctamente");
-                            setImageToModelChild(response,imagen);
-                        }
-
-                        @Override
-                        public void handleFault(BackendlessFault fault) {
-                            Toast.makeText(getApplicationContext(), "Algo salió mal hijo.." + fault.getMessage(),Toast.LENGTH_LONG).show();
-                            progress.setVisibility(View.GONE);
-                        }
-                    });
+                    Utils.showToast(getApplicationContext(), "Algo salió mal guardando ModeloPadre - " + fault.getMessage());
+                    progress.setVisibility(View.GONE);
                 }
-            }
-            @Override
-            public void handleFault(BackendlessFault fault) {
-                Toast.makeText(getApplicationContext(), "Algo salió mal mal hijo.." + fault.getMessage(),Toast.LENGTH_LONG).show();
-                progress.setVisibility(View.GONE);
+
             }
         });
-
     }
 
-    private void setImageToModelChild(ModeloChild modelChild,Imagen imagen) {
-        ArrayList<Imagen> list=new ArrayList<>();
-        list.add(imagen);
-        Backendless.Data.of(ModeloChild.class).setRelation(modelChild, "imagen", list, new AsyncCallback<Integer>() {
+    private void saveChildwithName(ModeloChild modeloChild) {
+        Backendless.Data.of(ModeloChild.class).save(modeloChild, new AsyncCallback<ModeloChild>() {
             @Override
-            public void handleResponse(Integer response) {
-                Utils.showToast(getApplicationContext(),"Se guardó el modelo por completo!!....");
+            public void handleResponse(ModeloChild response) {
+                Utils.showToast(getApplicationContext(), "Se guardó el modelo por completo");
                 foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
                 progress.setVisibility(View.GONE);
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                Utils.showToast(getApplicationContext(),"NO se guardó la relación ModeloChild-Imagen");
-                //foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
+                Utils.showToast(getApplicationContext(), "Algo salió mal guardando ModeloChild - " + fault.getMessage());
                 progress.setVisibility(View.GONE);
             }
         });
-
     }
-
 
     private void checkPermissionGallery() {
         if (ContextCompat.checkSelfPermission(this,

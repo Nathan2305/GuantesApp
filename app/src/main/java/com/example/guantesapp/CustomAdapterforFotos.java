@@ -1,6 +1,7 @@
 package com.example.guantesapp;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,11 +16,11 @@ import it.sephiroth.android.library.picasso.Picasso;
 
 public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterforFotos.ViewHolder> {
     private Context context;
-    private List<Imagen> fotoList;
-    private List<String> urlFotosChecked = new ArrayList<>();
+    private List<String> fotoList;
+    private List<String> ImageChecked = new ArrayList<>();
     private OnItemClickListener mListener;
 
-    public CustomAdapterforFotos(Context context, List<Imagen> fotoList) {
+    public CustomAdapterforFotos(Context context, List<String> fotoList) {
         this.context = context;
         this.fotoList = fotoList;
     }
@@ -32,7 +33,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
 
     @Override
     public void onBindViewHolder(CustomAdapterforFotos.ViewHolder viewHolder, int i) {
-        Picasso.with(this.context).load(fotoList.get(i).getFoto()).into(viewHolder.found_fotos);
+        Picasso.with(this.context).load(fotoList.get(i)).into(viewHolder.found_fotos);
     }
 
     @Override
@@ -57,14 +58,14 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
                             if (position != RecyclerView.NO_POSITION) {
                                 listener.onItemClick(position);
                                 found_fotos.setAlpha(0.5f);
-                                urlFotosChecked.add(fotoList.get(position).getFoto());
+                                ImageChecked.add(fotoList.get(position));
                                 check.setVisibility(View.VISIBLE);
                                 isTouched = true;
                             }
                         } else {
                             isTouched = false;
                             found_fotos.setAlpha(1f);
-                            urlFotosChecked.remove(fotoList.get(position).getFoto());
+                            ImageChecked.remove(fotoList.get(position));
                             check.setVisibility(View.GONE);
                         }
                     }
@@ -82,10 +83,6 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
     }
 
     public List<String> getUrlFotosChecked() {
-        if (!urlFotosChecked.isEmpty()) {
-            return urlFotosChecked;
-        }else{
-            return null;
-        }
+        return ImageChecked;
     }
 }

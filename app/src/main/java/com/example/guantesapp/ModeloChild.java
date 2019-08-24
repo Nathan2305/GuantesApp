@@ -4,7 +4,7 @@ package com.example.guantesapp;
 
 public class ModeloChild {
     private String nombre;
-    private Imagen imagen;
+    private String imagenUrl;
 
     public String getNombre() {
         return nombre;
@@ -14,11 +14,11 @@ public class ModeloChild {
         this.nombre = nombre;
     }
 
-    public Imagen getImagen() {
-        return imagen;
+    public String getImagenUrl() {
+        return imagenUrl;
     }
 
-    public void setImagen(Imagen imagen) {
-        this.imagen = imagen;
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 }
