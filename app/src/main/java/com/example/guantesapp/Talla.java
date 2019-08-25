@@ -1,16 +1,25 @@
 package com.example.guantesapp;
 
 public class Talla {
-    private String talla;
+    private String tallita;
     private String modelo;
     private int cantidad;
+    private String objectId;
 
-    public String getTalla() {
-        return talla;
+    public String getObjectId() {
+        return objectId;
     }
 
-    public void setTalla(String talla) {
-        this.talla = talla;
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
+
+    public String getTallita() {
+        return tallita;
+    }
+
+    public void setTallita(String tallita) {
+        this.tallita = tallita;
     }
 
     public String getModelo() {

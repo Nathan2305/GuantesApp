@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -44,6 +45,7 @@ public class AgregarStock extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     RecyclerView.Adapter adapter;
     Button addStock;
+    public static final String MY_APP = "GuantesApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,17 +95,36 @@ public class AgregarStock extends AppCompatActivity {
         addStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* if (adapter != null) {
-                    List<Imagen> fotosChecked = ((CustomAdapterforFotos) adapter).getUrlFotosChecked();
+                if (adapter != null) {
+                    final List<String> fotosChecked = ((CustomAdapterforFotos) adapter).getUrlFotosChecked();
                     if (!fotosChecked.isEmpty()) {
-                        String talla = (String) spinnerTalla.getSelectedItem();
-                        String cantidad = (String) spinnerCantidad.getSelectedItem();
-                        //addStock(talla, Integer.parseInt(cantidad), fotosChecked);
+                        final String talla = (String) spinnerTalla.getSelectedItem();
+                        final String cantidad = (String) spinnerCantidad.getSelectedItem();
+
+                        DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+                        StringBuffer stringBuffer = new StringBuffer();
+                        stringBuffer.append("imagenUrl='" + fotosChecked.get(0) + "'");
+                        queryBuilder.setWhereClause(stringBuffer.toString());
+                        Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
+                            @Override
+                            public void handleResponse(List<ModeloChild> response) {
+                                if (!response.isEmpty()) {
+                                    ModeloChild foundChild = response.get(0);
+                                    createTallaForModelChild(foundChild, talla, Integer.parseInt(cantidad));
+                                }
+
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault fault) {
+                                Log.i(MY_APP, "Error buscando modelo - " + fault.getMessage());
+                            }
+                        });
                     } else {
                         Toast.makeText(getApplicationContext(), "Selecciona un modelo", Toast.LENGTH_SHORT).show();
                     }
 
-                }*/
+                }
             }
         });
     }
@@ -115,22 +136,28 @@ public class AgregarStock extends AppCompatActivity {
         Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
             @Override
             public void handleResponse(List<ModeloChild> response) {
-                progressBar.setVisibility(View.GONE);
-                if (!response.isEmpty()){
-                    List<String> listFoto=new ArrayList<>();
-                    for (ModeloChild modeloChild : response){
+                if (!response.isEmpty()) {
+                    List<String> listFoto = new ArrayList<>();
+                    for (ModeloChild modeloChild : response) {
                         listFoto.add(modeloChild.getImagenUrl());
                     }
-                    adapter=new CustomAdapterforFotos(getApplicationContext(),listFoto);
+                    adapter = new CustomAdapterforFotos(getApplicationContext(), listFoto);
                     rec_fotos.setLayoutManager(layoutManager);
                     rec_fotos.setHasFixedSize(true);
                     rec_fotos.setAdapter(adapter);
+                    ((CustomAdapterforFotos) adapter).setOnItemClickListener(new CustomAdapterforFotos.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(int position) {
+
+                        }
+                    });
                 }
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                Utils.showToast(getApplicationContext(),"Algo salió mal buscando modelo " + modelo +" : "+fault.getMessage());
+                Utils.showToast(getApplicationContext(), "Algo salió mal buscando modelo " + modelo + " : " + fault.getMessage());
                 progressBar.setVisibility(View.GONE);
             }
         });
@@ -158,46 +185,75 @@ public class AgregarStock extends AppCompatActivity {
         startActivityForResult(pickPhotoIntent, REQUEST_IMAGE_GALLERY);
     }
 
-    /*private void addStock(final String tallita, final int cantidad, final List<Imagen> fotosChecked) {
-        DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("imagen.foto='" + fotosChecked.get(0).getFoto() + "'");
-        queryBuilder.setWhereClause(stringBuffer.toString());
-        Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
+
+    private void createTallaForModelChild(final ModeloChild modeloChild, final String talla, final int cantidad) {
+        final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("modelo ='" + modeloChild.getNombre() + "'")
+                .append(" and tallita='" + talla + "' ");
+        dataQueryBuilder.setWhereClause(stringBuilder.toString());
+        //Buscar si ya existe esa talla para el modelo respectivo
+        Backendless.Data.of(Talla.class).find(dataQueryBuilder, new AsyncCallback<List<Talla>>() {
             @Override
-            public void handleResponse(List<ModeloChild> response) {
-                if (!response.isEmpty()) {
-                    if (response.get(0) != null) {
-                        ModeloChild modeloChild = response.get(0);
-                        Talla talla = new Talla();
-                        talla.setTalla(tallita);
-                        talla.setModelo(modeloChild.getNombre());
-                        talla.setCantidad(cantidad);
-                        ArrayList<Talla> tallaList = new ArrayList<>();
-                        tallaList.add(talla);
+            public void handleResponse(List<Talla> tallasFound) {
+                if (tallasFound.isEmpty()) {   //se crea talla para ese modelo
+                    Talla tallaObj = new Talla();
+                    tallaObj.setModelo(modeloChild.getNombre());
+                    tallaObj.setTallita(talla);
+                    tallaObj.setCantidad(cantidad);
+                    Backendless.Data.of(Talla.class).save(tallaObj, new AsyncCallback<Talla>() {
+                        @Override
+                        public void handleResponse(Talla tallaCreated) {
+                            HashMap<String, Object> parentObject = new HashMap<String, Object>();
+                            parentObject.put("objectId", modeloChild.getObjectId());
 
-                        Backendless.Data.of(ModeloChild.class).addRelation(modeloChild, "talla", tallaList, new AsyncCallback<Integer>() {
-                            @Override
-                            public void handleResponse(Integer response) {
-                                System.out.println("Se agregó ModeloChild-Talla-Cantidad");
-                            }
+                            HashMap<String, Object> childObject = new HashMap<String, Object>();
+                            childObject.put("objectId", tallaCreated.getObjectId());
 
-                            @Override
-                            public void handleFault(BackendlessFault fault) {
-                                System.out.println("No se agregó ModeloChild-Talla-Cantidad " +fault.getMessage());
-                            }
-                        });
-                    }
+                            ArrayList<Map> children = new ArrayList<Map>();
+                            children.add(childObject);
+                            Backendless.Data.of("ModeloChild").addRelation(parentObject, "talla",
+                                    children, new AsyncCallback<Integer>() {
+                                        @Override
+                                        public void handleResponse(Integer response) {
+                                            Log.i(MY_APP, "Se guardo relacion Child - Talla");
+                                        }
 
+                                        @Override
+                                        public void handleFault(BackendlessFault fault) {
+                                            Log.i(MY_APP, "No se guardo relacion Child - Talla.. " + fault.getMessage());
+                                        }
+                                    });
+
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Log.i(MY_APP, "Error creando Talla.. " + fault.getMessage());
+                        }
+                    });
+                } else {   //Ya existe talla para ese modelo, entonces se actualizará su cantidad
+                    Map<String, Object> changes = new HashMap<>();
+                    changes.put( "cantidad",tallasFound.get(0).getCantidad()+ cantidad );
+                    Backendless.Data.of(Talla.class).update(dataQueryBuilder.getWhereClause(), changes, new AsyncCallback<Integer>() {
+                        @Override
+                        public void handleResponse(Integer response) {
+                        Utils.showToast(getApplicationContext(),"Se actualizó el stock para modelo "+modeloChild.getNombre()+ " y talla "+talla);
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Log.i(MY_APP,"Error actualizando Stock: "+fault.getMessage());
+                        }
+                    });
                 }
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                System.out.println("Error getting ModeloChild - "+fault.getMessage());
+                Log.i(MY_APP, "Error finding talla... " + fault.getMessage());
             }
         });
-
-    }*/
+    }
 
 }
