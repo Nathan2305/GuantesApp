@@ -32,6 +32,7 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
+import com.backendless.persistence.DataQueryBuilder;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
@@ -154,8 +155,9 @@ public class AgregarImagen extends AppCompatActivity {
         Backendless.Data.of(Modelo.class).save(modeloPadre, new AsyncCallback<Modelo>() {
             @Override
             public void handleResponse(Modelo response) {
-
-                Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+                DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+                queryBuilder.setPageSize(70);
+                Backendless.Data.of(ModeloChild.class).find(queryBuilder,new AsyncCallback<List<ModeloChild>>() {
                     @Override
                     public void handleResponse(List<ModeloChild> response) {
                         if (!response.isEmpty()) {
@@ -178,7 +180,9 @@ public class AgregarImagen extends AppCompatActivity {
             @Override
             public void handleFault(BackendlessFault fault) {
                 if ("1155".equalsIgnoreCase(fault.getCode())){
-                    Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+                    DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+                    queryBuilder.setPageSize(70);
+                    Backendless.Data.of(ModeloChild.class).find(queryBuilder,new AsyncCallback<List<ModeloChild>>() {
                         @Override
                         public void handleResponse(List<ModeloChild> response) {
                             if (!response.isEmpty()) {

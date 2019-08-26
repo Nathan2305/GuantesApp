@@ -7,5 +7,6 @@
     <color name="celesteClaro">#AAE4F8</color>
     <color name="celeste">#84C8FC</color>
     <color name="translucent">#0000ffff</color>
+    <color name="blanco">#FFFFFF</color>
 
 </resources>

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +19,13 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
     private Context context;
     private List<String> fotoList;
     private List<String> ImageChecked = new ArrayList<>();
+    List<String> listModelo = new ArrayList<>();
     private OnItemClickListener mListener;
 
-    public CustomAdapterforFotos(Context context, List<String> fotoList) {
+    public CustomAdapterforFotos(Context context, List<String> fotoList, List<String> listModelo) {
         this.context = context;
         this.fotoList = fotoList;
+        this.listModelo=listModelo;
     }
 
     @Override
@@ -34,6 +37,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
     @Override
     public void onBindViewHolder(CustomAdapterforFotos.ViewHolder viewHolder, int i) {
         Picasso.with(this.context).load(fotoList.get(i)).into(viewHolder.found_fotos);
+        viewHolder.nameModelo.setText(listModelo.get(i));
     }
 
     @Override
@@ -43,12 +47,14 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView found_fotos, check;
+        TextView nameModelo;
         boolean isTouched = false;
 
         public ViewHolder(@NonNull View itemView, final OnItemClickListener listener) {
             super(itemView);
             found_fotos = itemView.findViewById(R.id.found_fotos);
             check = itemView.findViewById(R.id.check);
+            nameModelo= itemView.findViewById(R.id.nameModelo);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

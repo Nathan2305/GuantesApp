@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,12 +46,14 @@ public class AgregarStock extends AppCompatActivity {
     RecyclerView.LayoutManager layoutManager;
     RecyclerView.Adapter adapter;
     Button addStock;
+    ConstraintLayout layoutParent;
     public static final String MY_APP = "GuantesApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_stock);
+        layoutParent = findViewById(R.id.layoutParent);
         progressBar = findViewById(R.id.progress);
         addStock = findViewById(R.id.addStock);
         Sprite doubleBounce = new FadingCircle();
@@ -97,9 +100,12 @@ public class AgregarStock extends AppCompatActivity {
             public void onClick(View v) {
                 if (adapter != null) {
                     final List<String> fotosChecked = ((CustomAdapterforFotos) adapter).getUrlFotosChecked();
-                    if (!fotosChecked.isEmpty()) {
-                        final String talla = (String) spinnerTalla.getSelectedItem();
-                        final String cantidad = (String) spinnerCantidad.getSelectedItem();
+                    final String talla = (String) spinnerTalla.getSelectedItem();
+                    final String cantidad = (String) spinnerCantidad.getSelectedItem();
+                    if (!fotosChecked.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
+                        layoutParent.setAlpha(0.5f);
+                        progressBar.setVisibility(View.VISIBLE);
+
 
                         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
                         StringBuffer stringBuffer = new StringBuffer();
@@ -118,10 +124,11 @@ public class AgregarStock extends AppCompatActivity {
                             @Override
                             public void handleFault(BackendlessFault fault) {
                                 Log.i(MY_APP, "Error buscando modelo - " + fault.getMessage());
+                                progressBar.setVisibility(View.GONE);
                             }
                         });
                     } else {
-                        Toast.makeText(getApplicationContext(), "Selecciona un modelo", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Uno o más campos vacíos", Toast.LENGTH_SHORT).show();
                     }
 
                 }
@@ -138,10 +145,13 @@ public class AgregarStock extends AppCompatActivity {
             public void handleResponse(List<ModeloChild> response) {
                 if (!response.isEmpty()) {
                     List<String> listFoto = new ArrayList<>();
+                    List<String> listModelo = new ArrayList<>();
+
                     for (ModeloChild modeloChild : response) {
                         listFoto.add(modeloChild.getImagenUrl());
+                        listModelo.add(modeloChild.getNombre());
                     }
-                    adapter = new CustomAdapterforFotos(getApplicationContext(), listFoto);
+                    adapter = new CustomAdapterforFotos(getApplicationContext(), listFoto, listModelo);
                     rec_fotos.setLayoutManager(layoutManager);
                     rec_fotos.setHasFixedSize(true);
                     rec_fotos.setAdapter(adapter);
@@ -203,7 +213,7 @@ public class AgregarStock extends AppCompatActivity {
                     tallaObj.setCantidad(cantidad);
                     Backendless.Data.of(Talla.class).save(tallaObj, new AsyncCallback<Talla>() {
                         @Override
-                        public void handleResponse(Talla tallaCreated) {
+                        public void handleResponse(final Talla tallaCreated) {
                             HashMap<String, Object> parentObject = new HashMap<String, Object>();
                             parentObject.put("objectId", modeloChild.getObjectId());
 
@@ -216,12 +226,15 @@ public class AgregarStock extends AppCompatActivity {
                                     children, new AsyncCallback<Integer>() {
                                         @Override
                                         public void handleResponse(Integer response) {
-                                            Log.i(MY_APP, "Se guardo relacion Child - Talla");
+                                            Utils.showToast(getApplicationContext(), "Se creó stock para modelo " +
+                                                    modeloChild.getNombre() + " y talla " + tallaCreated.getTallita());
+                                            progressBar.setVisibility(View.GONE);
                                         }
 
                                         @Override
                                         public void handleFault(BackendlessFault fault) {
                                             Log.i(MY_APP, "No se guardo relacion Child - Talla.. " + fault.getMessage());
+                                            progressBar.setVisibility(View.GONE);
                                         }
                                     });
 
@@ -230,20 +243,23 @@ public class AgregarStock extends AppCompatActivity {
                         @Override
                         public void handleFault(BackendlessFault fault) {
                             Log.i(MY_APP, "Error creando Talla.. " + fault.getMessage());
+                            progressBar.setVisibility(View.GONE);
                         }
                     });
                 } else {   //Ya existe talla para ese modelo, entonces se actualizará su cantidad
                     Map<String, Object> changes = new HashMap<>();
-                    changes.put( "cantidad",tallasFound.get(0).getCantidad()+ cantidad );
+                    changes.put("cantidad", tallasFound.get(0).getCantidad() + cantidad);
                     Backendless.Data.of(Talla.class).update(dataQueryBuilder.getWhereClause(), changes, new AsyncCallback<Integer>() {
                         @Override
                         public void handleResponse(Integer response) {
-                        Utils.showToast(getApplicationContext(),"Se actualizó el stock para modelo "+modeloChild.getNombre()+ " y talla "+talla);
+                            Utils.showToast(getApplicationContext(), "Se actualizó el stock para modelo " + modeloChild.getNombre() + " y talla " + talla);
+                            progressBar.setVisibility(View.GONE);
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
-                            Log.i(MY_APP,"Error actualizando Stock: "+fault.getMessage());
+                            Log.i(MY_APP, "Error actualizando Stock: " + fault.getMessage());
+                            progressBar.setVisibility(View.GONE);
                         }
                     });
                 }
@@ -252,6 +268,7 @@ public class AgregarStock extends AppCompatActivity {
             @Override
             public void handleFault(BackendlessFault fault) {
                 Log.i(MY_APP, "Error finding talla... " + fault.getMessage());
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
