@@ -21,9 +21,7 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
-import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
-import com.squareup.okhttp.internal.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
     Animation fabOpen, fabClose, rotateForward, rotateBackward;
     ProgressBar progress;
     boolean isOpen = false;
+    List<Talla> listTalla;
+    List<ModeloChild> listModeloChild;
+    RecyclerView.Adapter adapterTallaModeloChild;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,16 +48,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
         sp_modelo = findViewById(R.id.sp_modelo);
-        progress=findViewById(R.id.progress);
-        Sprite doubleBounce = new FadingCircle();
-        progress.setProgressDrawable(doubleBounce);
+        progress = findViewById(R.id.progress);
+        FadingCircle fadingCircle = new FadingCircle();
+        progress.setProgressDrawable(fadingCircle);
         sp_talla = findViewById(R.id.sp_talla);
         fab_add = findViewById(R.id.fab_add);
         fab_add_stock = findViewById(R.id.fab_add_stock);
         fab_add_photo = findViewById(R.id.fab_add_photo);
         recFound = findViewById(R.id.recFound);
         consultar = findViewById(R.id.consultar);
-        layoutManager = new LinearLayoutManager(getApplicationContext());
+        layoutManager = new LinearLayoutManager(this);
+        recFound.setLayoutManager(layoutManager);
+        recFound.setHasFixedSize(true);
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
@@ -96,59 +99,96 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 progress.setVisibility(View.VISIBLE);
-                final List<Talla> listTalla = new ArrayList<>();
-                final List<ModeloChild> listModeloChild = new ArrayList<>();
+                listTalla = new ArrayList<>();
+                listModeloChild = new ArrayList<>();
                 String modelo = (String) sp_modelo.getSelectedItem();
                 String talla = (String) sp_talla.getSelectedItem();
                 DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
                 StringBuilder sb = new StringBuilder();
-                sb.append(" tallita='" + talla + "'")
-                        .append(" and modelo like'" + modelo + "%'")
-                        .append(" and cantidad>0");
-                dataQueryBuilder.setWhereClause(sb.toString());
-                Backendless.Data.of(Talla.class).find(dataQueryBuilder, new AsyncCallback<List<Talla>>() {
-                    @Override
-                    public void handleResponse(List<Talla> response) {
-                        if (!response.isEmpty()) {
-                            for (Talla auxTalla : response) {
-                                listTalla.add(auxTalla);
+                if (!talla.isEmpty()) {
+                    sb.append(" tallita='" + talla + "'")
+                            .append(" and modelo like'" + modelo + "%'")
+                            .append(" and cantidad>0");
+                    dataQueryBuilder.setWhereClause(sb.toString());
+                    Backendless.Data.of(Talla.class).find(dataQueryBuilder, new AsyncCallback<List<Talla>>() {
+                        @Override
+                        public void handleResponse(List<Talla> response) {
+                            if (!response.isEmpty()) {
+                                for (Talla auxTalla : response) {
+                                    listTalla.add(auxTalla);
+                                }
+                                Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+                                    @Override
+                                    public void handleResponse(List<ModeloChild> response) {
+                                        if (!response.isEmpty()) {
+                                            for (ModeloChild modeloChild : response) {
+                                                for (Talla auxTalla : listTalla) {
+                                                    if (modeloChild.getNombre().equalsIgnoreCase(auxTalla.getModelo())) {
+                                                        listModeloChild.add(modeloChild);
+                                                    }
+                                                }
+                                            }
+                                            adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, listModeloChild);
+                                            recFound.setAdapter(adapterTallaModeloChild);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void handleFault(BackendlessFault fault) {
+                                        Utils.showToast(getApplicationContext(), "Error buscando modeloChild - " + fault.getMessage());
+                                        progress.setVisibility(View.GONE);
+                                    }
+                                });
+
+
                             }
-                            Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
-                                @Override
-                                public void handleResponse(List<ModeloChild> response) {
-                                    if (!response.isEmpty()) {
-                                        for (ModeloChild modeloChild : response) {
-                                            for (Talla auxTalla : listTalla) {
-                                                if (modeloChild.getNombre().equalsIgnoreCase(auxTalla.getModelo())) {
-                                                    listModeloChild.add(modeloChild);
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Utils.showToast(getApplicationContext(), "Error buscando talla - " + fault.getMessage());
+                            progress.setVisibility(View.GONE);
+                        }
+                    });
+                } else {
+                    sb.append(" nombre like '" + modelo + "%'");
+                    dataQueryBuilder.setWhereClause(sb.toString());
+                    Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
+                        @Override
+                        public void handleResponse(List<ModeloChild> response) {
+                            if (!response.isEmpty()) {
+                                listModeloChild = response;
+                                Backendless.Data.of(Talla.class).find(new AsyncCallback<List<Talla>>() {
+                                    @Override
+                                    public void handleResponse(List<Talla> response) {
+                                        if (!response.isEmpty()) {
+                                            for (Talla tallaobj : response) {
+                                                for (ModeloChild modeloChild : listModeloChild) {
+                                                    if (tallaobj.getModelo().equalsIgnoreCase(modeloChild.getNombre())) {
+                                                        listTalla.add(tallaobj);
+                                                    }
                                                 }
                                             }
                                         }
-
+                                        adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, listModeloChild);
+                                        recFound.setAdapter(adapterTallaModeloChild);
                                     }
-                                }
 
-                                @Override
-                                public void handleFault(BackendlessFault fault) {
-                                    Utils.showToast(getApplicationContext(), "Error buscando modeloChild - " + fault.getMessage());
-                                    progress.setVisibility(View.GONE);
-                                }
-                            });
-
-
+                                    @Override
+                                    public void handleFault(BackendlessFault fault) {
+                                        Utils.showToast(getApplicationContext(), "Error getting Tallas -" + fault.getMessage());
+                                    }
+                                });
+                            }
                         }
-                    }
 
-                    @Override
-                    public void handleFault(BackendlessFault fault) {
-                        Utils.showToast(getApplicationContext(), "Error buscando talla - " + fault.getMessage());
-                        progress.setVisibility(View.GONE);
-                    }
-                });
-                AdapterTallaModeloChild adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, listModeloChild);
-                recFound.setLayoutManager(layoutManager);
-                recFound.setHasFixedSize(true);
-                recFound.setAdapter(adapterTallaModeloChild);
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Utils.showToast(getApplicationContext(), "Error getting ModeloChild -" + fault.getMessage());
+                        }
+                    });
+                }
+
                 progress.setVisibility(View.GONE);
             }
 
