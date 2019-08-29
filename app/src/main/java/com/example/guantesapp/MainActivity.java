@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
         sp_modelo = findViewById(R.id.sp_modelo);
         progress = findViewById(R.id.progress);
-        FadingCircle fadingCircle = new FadingCircle();
+        final FadingCircle fadingCircle = new FadingCircle();
         progress.setProgressDrawable(fadingCircle);
         sp_talla = findViewById(R.id.sp_talla);
         fab_add = findViewById(R.id.fab_add);
@@ -101,10 +101,11 @@ public class MainActivity extends AppCompatActivity {
                 progress.setVisibility(View.VISIBLE);
                 listTalla = new ArrayList<>();
                 listModeloChild = new ArrayList<>();
-                String modelo = (String) sp_modelo.getSelectedItem();
-                String talla = (String) sp_talla.getSelectedItem();
-                DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+                final String modelo = (String) sp_modelo.getSelectedItem();
+                final String talla = (String) sp_talla.getSelectedItem();
+                final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
                 StringBuilder sb = new StringBuilder();
+                final List<String> modelosUrl=new ArrayList<>();
                 if (!talla.isEmpty()) {
                     sb.append(" tallita='" + talla + "'")
                             .append(" and modelo like'" + modelo + "%'")
@@ -124,11 +125,12 @@ public class MainActivity extends AppCompatActivity {
                                             for (ModeloChild modeloChild : response) {
                                                 for (Talla auxTalla : listTalla) {
                                                     if (modeloChild.getNombre().equalsIgnoreCase(auxTalla.getModelo())) {
-                                                        listModeloChild.add(modeloChild);
+                                                        //listModeloChild.add(modeloChild);
+                                                        modelosUrl.add(modeloChild.getImagenUrl());
                                                     }
                                                 }
                                             }
-                                            adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, listModeloChild);
+                                            adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
                                             recFound.setAdapter(adapterTallaModeloChild);
                                         }
                                     }
@@ -151,13 +153,16 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    sb.append(" nombre like '" + modelo + "%'");
+
+                    sb.append(" nombre like '" + modelo + "%'")
+                            .append(" and talla.tallita!=null");
                     dataQueryBuilder.setWhereClause(sb.toString());
                     Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
                         @Override
                         public void handleResponse(List<ModeloChild> response) {
                             if (!response.isEmpty()) {
                                 listModeloChild = response;
+
                                 Backendless.Data.of(Talla.class).find(new AsyncCallback<List<Talla>>() {
                                     @Override
                                     public void handleResponse(List<Talla> response) {
@@ -169,9 +174,30 @@ public class MainActivity extends AppCompatActivity {
                                                     }
                                                 }
                                             }
+                                            Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
+                                                @Override
+                                                public void handleResponse(List<ModeloChild> response) {
+                                                        if (!response.isEmpty()){
+                                                            for (Talla tallita:listTalla){
+                                                                for (ModeloChild modeloChild:response){
+                                                                    if (tallita.getModelo().equalsIgnoreCase(modeloChild.getNombre())){
+                                                                        modelosUrl.add(modeloChild.getImagenUrl());
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
+                                                    recFound.setAdapter(adapterTallaModeloChild);
+                                                }
+
+                                                @Override
+                                                public void handleFault(BackendlessFault fault) {
+                                                    Utils.showToast(MainActivity.this,"Error buscando CHild -"+fault.getMessage());
+                                                }
+                                            });
                                         }
-                                        adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, listModeloChild);
-                                        recFound.setAdapter(adapterTallaModeloChild);
+                                       /* adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
+                                        recFound.setAdapter(adapterTallaModeloChild);*/
                                     }
 
                                     @Override

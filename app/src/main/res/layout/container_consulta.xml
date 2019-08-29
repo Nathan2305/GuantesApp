@@ -28,29 +28,48 @@
                 android:layout_height="130dp" />
 
             <LinearLayout
-                android:padding="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="10dp">
 
                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Talla: "
+                        android:textColor="@color/colorPrimaryDark" />
+
+                    <TextView
+                        android:id="@+id/tallaFound"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorPrimaryDark" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="20dp"
                     android:layout_marginBottom="20dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <TextView
-                        android:textColor="@color/colorPrimaryDark"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Talla: " />
+                        android:text="Cantidad:"
+                        android:textColor="@color/colorPrimaryDark" />
 
                     <TextView
-                        android:textColor="@color/colorPrimaryDark"
-                        android:id="@+id/tallaFound"
+                        android:id="@+id/cantidadFound"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorPrimaryDark" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -59,16 +78,16 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:textColor="@color/colorPrimaryDark"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cantidad:" />
+                        android:text="Modelo:"
+                        android:textColor="@color/colorPrimaryDark" />
 
                     <TextView
-                        android:textColor="@color/colorPrimaryDark"
-                        android:id="@+id/cantidadFound"
+                        android:id="@+id/modeloFound"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorPrimaryDark" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

@@ -16,12 +16,12 @@ import it.sephiroth.android.library.picasso.Picasso;
 public class AdapterTallaModeloChild extends RecyclerView.Adapter<AdapterTallaModeloChild.ViewHolder> {
     private Context context;
     private List<Talla> listTalla;
-    private List<ModeloChild> listChild;
+    private List<String> listaUrl;
 
-    public AdapterTallaModeloChild(Context context, List<Talla> listTalla, List<ModeloChild> listChild) {
+    public AdapterTallaModeloChild(Context context, List<Talla> listTalla, List<String> listChild) {
         this.context = context;
         this.listTalla = listTalla;
-        this.listChild = listChild;
+        this.listaUrl = listChild;
     }
 
     @Override
@@ -32,9 +32,10 @@ public class AdapterTallaModeloChild extends RecyclerView.Adapter<AdapterTallaMo
 
     @Override
     public void onBindViewHolder(@NonNull AdapterTallaModeloChild.ViewHolder viewHolder, int i) {
-        Picasso.with(this.context).load(listChild.get(i).getImagenUrl()).into(viewHolder.fotoFound);
+        Picasso.with(this.context).load(listaUrl.get(i)).into(viewHolder.fotoFound);
         viewHolder.tallaFound.setText(listTalla.get(i).getTallita());
         viewHolder.cantidadFound.setText(" " + listTalla.get(i).getCantidad());
+        viewHolder.modeloFound.setText(" " + listTalla.get(i).getModelo());
     }
 
     @Override
@@ -44,13 +45,14 @@ public class AdapterTallaModeloChild extends RecyclerView.Adapter<AdapterTallaMo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView fotoFound;
-        TextView tallaFound, cantidadFound;
+        TextView tallaFound, cantidadFound, modeloFound;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             fotoFound = itemView.findViewById(R.id.fotoFound);
             tallaFound = itemView.findViewById(R.id.tallaFound);
             cantidadFound = itemView.findViewById(R.id.cantidadFound);
+            modeloFound = itemView.findViewById(R.id.modeloFound);
         }
     }
 }
