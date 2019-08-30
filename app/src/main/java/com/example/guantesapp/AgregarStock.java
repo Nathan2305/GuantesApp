@@ -56,8 +56,8 @@ public class AgregarStock extends AppCompatActivity {
         layoutParent = findViewById(R.id.layoutParent);
         progressBar = findViewById(R.id.progress);
         addStock = findViewById(R.id.addStock);
-        Sprite doubleBounce = new FadingCircle();
-        progressBar.setProgressDrawable(doubleBounce);
+        FadingCircle fadingCircle = new FadingCircle();
+        progressBar.setProgressDrawable(fadingCircle);
         spinnerModelo = findViewById(R.id.sp_modelo2);
         spinnerTalla = findViewById(R.id.sp_talla2);
         spinnerCantidad = findViewById(R.id.sp_cantidad2);
@@ -103,10 +103,8 @@ public class AgregarStock extends AppCompatActivity {
                     final String talla = (String) spinnerTalla.getSelectedItem();
                     final String cantidad = (String) spinnerCantidad.getSelectedItem();
                     if (!fotosChecked.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
-                        layoutParent.setAlpha(0.5f);
+                        disableViews(true);
                         progressBar.setVisibility(View.VISIBLE);
-
-
                         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
                         StringBuffer stringBuffer = new StringBuffer();
                         stringBuffer.append("imagenUrl='" + fotosChecked.get(0) + "'");
@@ -118,12 +116,12 @@ public class AgregarStock extends AppCompatActivity {
                                     ModeloChild foundChild = response.get(0);
                                     createTallaForModelChild(foundChild, talla, Integer.parseInt(cantidad));
                                 }
-
                             }
 
                             @Override
                             public void handleFault(BackendlessFault fault) {
                                 Log.i(MY_APP, "Error buscando modelo - " + fault.getMessage());
+                                disableViews(false);
                                 progressBar.setVisibility(View.GONE);
                             }
                         });
@@ -229,12 +227,14 @@ public class AgregarStock extends AppCompatActivity {
                                             Utils.showToast(getApplicationContext(), "Se creó stock para modelo " +
                                                     modeloChild.getNombre() + " y talla " + tallaCreated.getTallita());
                                             progressBar.setVisibility(View.GONE);
+                                            disableViews(false);
                                         }
 
                                         @Override
                                         public void handleFault(BackendlessFault fault) {
                                             Log.i(MY_APP, "No se guardo relacion Child - Talla.. " + fault.getMessage());
                                             progressBar.setVisibility(View.GONE);
+                                            disableViews(false);
                                         }
                                     });
 
@@ -244,6 +244,7 @@ public class AgregarStock extends AppCompatActivity {
                         public void handleFault(BackendlessFault fault) {
                             Log.i(MY_APP, "Error creando Talla.. " + fault.getMessage());
                             progressBar.setVisibility(View.GONE);
+                            disableViews(false);
                         }
                     });
                 } else {   //Ya existe talla para ese modelo, entonces se actualizará su cantidad
@@ -254,12 +255,14 @@ public class AgregarStock extends AppCompatActivity {
                         public void handleResponse(Integer response) {
                             Utils.showToast(getApplicationContext(), "Se actualizó el stock para modelo " + modeloChild.getNombre() + " y talla " + talla);
                             progressBar.setVisibility(View.GONE);
+                            disableViews(false);
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
                             Log.i(MY_APP, "Error actualizando Stock: " + fault.getMessage());
                             progressBar.setVisibility(View.GONE);
+                            disableViews(false);
                         }
                     });
                 }
@@ -269,8 +272,25 @@ public class AgregarStock extends AppCompatActivity {
             public void handleFault(BackendlessFault fault) {
                 Log.i(MY_APP, "Error finding talla... " + fault.getMessage());
                 progressBar.setVisibility(View.GONE);
+                disableViews(false);
             }
         });
     }
 
+    public void disableViews(boolean val) {
+        if (val) {
+            layoutParent.setAlpha(0.5f);
+            addStock.setEnabled(false);
+            spinnerModelo.setEnabled(false);
+            spinnerTalla.setEnabled(false);
+            spinnerCantidad.setEnabled(false);
+        } else {
+            layoutParent.setAlpha(1f);
+            addStock.setEnabled(true);
+            spinnerModelo.setEnabled(true);
+            spinnerTalla.setEnabled(true);
+            spinnerCantidad.setEnabled(true);
+        }
+
+    }
 }

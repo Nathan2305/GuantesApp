@@ -2,7 +2,10 @@ package com.example.guantesapp;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +24,7 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
+import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.util.ArrayList;
@@ -29,6 +33,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     Spinner sp_modelo, sp_talla;
+    ConstraintLayout layoutParent;
     FloatingActionButton fab_add, fab_add_stock, fab_add_photo;
     public static List<String> modelos;
     Button consultar;
@@ -47,9 +52,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
+        layoutParent = findViewById(R.id.parentConstraint);
         sp_modelo = findViewById(R.id.sp_modelo);
-        progress = findViewById(R.id.progress);
-        final FadingCircle fadingCircle = new FadingCircle();
+        progress = findViewById(R.id.progressBar);
+        FadingCircle fadingCircle = new FadingCircle();
         progress.setProgressDrawable(fadingCircle);
         sp_talla = findViewById(R.id.sp_talla);
         fab_add = findViewById(R.id.fab_add);
@@ -65,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
         rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
         getAllModelos();
+        progress.setVisibility(View.VISIBLE);
         adapter_tallas = ArrayAdapter.createFromResource(this, R.array.tallas_guantes, android.R.layout.simple_spinner_item);
         adapter_tallas.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_talla.setAdapter(adapter_tallas);
@@ -78,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             fab_add_stock.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.celeste)));
             fab_add_photo.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.naranaja)));
+
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            progress.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.translucent)));
         }
         fab_add_stock.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 progress.setVisibility(View.VISIBLE);
+                disableViews(true);
                 listTalla = new ArrayList<>();
                 listModeloChild = new ArrayList<>();
                 final String modelo = (String) sp_modelo.getSelectedItem();
@@ -108,63 +120,70 @@ public class MainActivity extends AppCompatActivity {
                 StringBuilder sb = new StringBuilder();
                 final List<String> modelosUrl = new ArrayList<>();
                 if (!talla.isEmpty()) {
-                    sb.append(" tallita='" + talla + "'")
-                            .append(" and modelo like'" + modelo + "%'")
-                            .append(" and cantidad>0");
+                    sb.append("modelo like '" + modelo + "%'")
+                            .append(" and tallita='" + talla + "'");
                     dataQueryBuilder.setWhereClause(sb.toString());
                     Backendless.Data.of(Talla.class).find(dataQueryBuilder, new AsyncCallback<List<Talla>>() {
                         @Override
                         public void handleResponse(List<Talla> response) {
                             if (!response.isEmpty()) {
-                                for (Talla auxTalla : response) {
-                                    listTalla.add(auxTalla);
-                                }
-                                Backendless.Data.of(ModeloChild.class).find(new AsyncCallback<List<ModeloChild>>() {
+                                listTalla = response;
+                                DataQueryBuilder dq = DataQueryBuilder.create();
+                                dq.setPageSize(50);
+                                dq.setWhereClause("nombre like '" + modelo + "%'");
+                                Backendless.Data.of(ModeloChild.class).find(dq, new AsyncCallback<List<ModeloChild>>() {
                                     @Override
                                     public void handleResponse(List<ModeloChild> response) {
                                         if (!response.isEmpty()) {
-                                            for (ModeloChild modeloChild : response) {
-                                                for (Talla auxTalla : listTalla) {
-                                                    if (modeloChild.getNombre().equalsIgnoreCase(auxTalla.getModelo())) {
-                                                        //listModeloChild.add(modeloChild);
+                                            for (Talla tallita : listTalla) {
+                                                for (ModeloChild modeloChild : response) {
+                                                    if (modeloChild.getNombre().equalsIgnoreCase(tallita.getModelo())) {
                                                         modelosUrl.add(modeloChild.getImagenUrl());
                                                     }
                                                 }
                                             }
-                                            adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
-                                            recFound.setAdapter(adapterTallaModeloChild);
                                         }
+                                        adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
+                                        recFound.setAdapter(adapterTallaModeloChild);
+                                        progress.setVisibility(View.GONE);
+                                        disableViews(false);
                                     }
 
                                     @Override
                                     public void handleFault(BackendlessFault fault) {
-                                        Utils.showToast(getApplicationContext(), "Error buscando modeloChild - " + fault.getMessage());
+                                        Utils.showToast(MainActivity.this, "Error buscando CHild -" + fault.getMessage());
                                         progress.setVisibility(View.GONE);
+                                        disableViews(false);
                                     }
                                 });
-
-
+                            } else {
+                                Utils.showToast(MainActivity.this, "No hay modelos " + modelo + " disponibles");
+                                progress.setVisibility(View.GONE);
+                                disableViews(false);
                             }
+
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
-                            Utils.showToast(getApplicationContext(), "Error buscando talla - " + fault.getMessage());
+                            Utils.showToast(MainActivity.this, "Error buscando Talla -" + fault.getMessage());
                             progress.setVisibility(View.GONE);
+                            disableViews(false);
                         }
                     });
                 } else {
                     sb.append(" nombre like '" + modelo + "%'")
                             .append(" and talla.tallita!=null");
                     dataQueryBuilder.setWhereClause(sb.toString());
+
                     Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
                         @Override
                         public void handleResponse(List<ModeloChild> response) {
                             if (!response.isEmpty()) {
                                 listModeloChild = response;
-                                DataQueryBuilder dataQ=DataQueryBuilder.create();
+                                DataQueryBuilder dataQ = DataQueryBuilder.create();
                                 dataQ.setPageSize(50);
-                                Backendless.Data.of(Talla.class).find(dataQ,new AsyncCallback<List<Talla>>() {
+                                Backendless.Data.of(Talla.class).find(dataQ, new AsyncCallback<List<Talla>>() {
                                     @Override
                                     public void handleResponse(List<Talla> response) {
                                         if (!response.isEmpty()) {
@@ -189,11 +208,15 @@ public class MainActivity extends AppCompatActivity {
                                                     }
                                                     adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
                                                     recFound.setAdapter(adapterTallaModeloChild);
+                                                    progress.setVisibility(View.GONE);
+                                                    disableViews(false);
                                                 }
 
                                                 @Override
                                                 public void handleFault(BackendlessFault fault) {
                                                     Utils.showToast(MainActivity.this, "Error buscando CHild -" + fault.getMessage());
+                                                    progress.setVisibility(View.GONE);
+                                                    disableViews(false);
                                                 }
                                             });
                                         }
@@ -202,19 +225,25 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void handleFault(BackendlessFault fault) {
                                         Utils.showToast(getApplicationContext(), "Error getting Tallas -" + fault.getMessage());
+                                        progress.setVisibility(View.GONE);
+                                        disableViews(false);
                                     }
                                 });
+                            } else {
+                                Utils.showToast(MainActivity.this, "No hay modelos " + modelo + " disponibles");
+                                progress.setVisibility(View.GONE);
+                                disableViews(false);
                             }
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
                             Utils.showToast(getApplicationContext(), "Error getting ModeloChild -" + fault.getMessage());
+                            progress.setVisibility(View.GONE);
+                            disableViews(false);
                         }
                     });
                 }
-
-                progress.setVisibility(View.GONE);
             }
 
         });
@@ -234,11 +263,14 @@ public class MainActivity extends AppCompatActivity {
                         ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, modelos);
                         adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         sp_modelo.setAdapter(adapter_modelos);
+                        progress.setVisibility(View.GONE);
                     } catch (Exception e) {
                         System.out.println("Exception Guava... " + e.getMessage());
+                        progress.setVisibility(View.GONE);
                     }
                 } else {
                     Toast.makeText(getApplicationContext(), "No se han agredado modelos aún", Toast.LENGTH_SHORT).show();
+                    progress.setVisibility(View.GONE);
                 }
             }
 
@@ -272,4 +304,23 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         getAllModelos();
     }
+
+    public void disableViews(boolean val) {
+        if (val) {
+            layoutParent.setAlpha(0.5f);
+            consultar.setEnabled(false);
+            fab_add.setEnabled(false);
+            sp_modelo.setEnabled(false);
+            sp_talla.setEnabled(false);
+        } else {
+            layoutParent.setAlpha(1f);
+            consultar.setEnabled(true);
+            fab_add.setEnabled(true);
+            sp_modelo.setEnabled(true);
+            sp_talla.setEnabled(true);
+        }
+
+    }
+
+
 }
