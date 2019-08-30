@@ -104,8 +104,9 @@ public class MainActivity extends AppCompatActivity {
                 final String modelo = (String) sp_modelo.getSelectedItem();
                 final String talla = (String) sp_talla.getSelectedItem();
                 final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+                dataQueryBuilder.setPageSize(50);
                 StringBuilder sb = new StringBuilder();
-                final List<String> modelosUrl=new ArrayList<>();
+                final List<String> modelosUrl = new ArrayList<>();
                 if (!talla.isEmpty()) {
                     sb.append(" tallita='" + talla + "'")
                             .append(" and modelo like'" + modelo + "%'")
@@ -153,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-
                     sb.append(" nombre like '" + modelo + "%'")
                             .append(" and talla.tallita!=null");
                     dataQueryBuilder.setWhereClause(sb.toString());
@@ -162,8 +162,9 @@ public class MainActivity extends AppCompatActivity {
                         public void handleResponse(List<ModeloChild> response) {
                             if (!response.isEmpty()) {
                                 listModeloChild = response;
-
-                                Backendless.Data.of(Talla.class).find(new AsyncCallback<List<Talla>>() {
+                                DataQueryBuilder dataQ=DataQueryBuilder.create();
+                                dataQ.setPageSize(50);
+                                Backendless.Data.of(Talla.class).find(dataQ,new AsyncCallback<List<Talla>>() {
                                     @Override
                                     public void handleResponse(List<Talla> response) {
                                         if (!response.isEmpty()) {
@@ -177,27 +178,25 @@ public class MainActivity extends AppCompatActivity {
                                             Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
                                                 @Override
                                                 public void handleResponse(List<ModeloChild> response) {
-                                                        if (!response.isEmpty()){
-                                                            for (Talla tallita:listTalla){
-                                                                for (ModeloChild modeloChild:response){
-                                                                    if (tallita.getModelo().equalsIgnoreCase(modeloChild.getNombre())){
-                                                                        modelosUrl.add(modeloChild.getImagenUrl());
-                                                                    }
+                                                    if (!response.isEmpty()) {
+                                                        for (Talla tallita : listTalla) {
+                                                            for (ModeloChild modeloChild : response) {
+                                                                if (tallita.getModelo().equalsIgnoreCase(modeloChild.getNombre())) {
+                                                                    modelosUrl.add(modeloChild.getImagenUrl());
                                                                 }
                                                             }
                                                         }
+                                                    }
                                                     adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
                                                     recFound.setAdapter(adapterTallaModeloChild);
                                                 }
 
                                                 @Override
                                                 public void handleFault(BackendlessFault fault) {
-                                                    Utils.showToast(MainActivity.this,"Error buscando CHild -"+fault.getMessage());
+                                                    Utils.showToast(MainActivity.this, "Error buscando CHild -" + fault.getMessage());
                                                 }
                                             });
                                         }
-                                       /* adapterTallaModeloChild = new AdapterTallaModeloChild(getApplicationContext(), listTalla, modelosUrl);
-                                        recFound.setAdapter(adapterTallaModeloChild);*/
                                     }
 
                                     @Override
