@@ -9,26 +9,26 @@
 
     <com.github.ybq.android.spinkit.SpinKitView
         android:id="@+id/progress"
+        style="@style/SpinKitView.FadingCircle"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:elevation="1dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        style="@style/SpinKitView.FadingCircle"
         android:backgroundTint="@color/translucent"
+        android:elevation="1dp"
         android:visibility="invisible"
         app:SpinKit_Color="@color/naranaja"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/rec_fotos"
-        app:layout_constraintHorizontal_bias="0.525"
-        app:layout_constraintStart_toStartOf="@+id/rec_fotos"
-        app:layout_constraintTop_toTopOf="@+id/rec_fotos"
-        app:layout_constraintVertical_bias="0.335" />
+        app:layout_constraintBottom_toBottomOf="@+id/gridViewFotos"
+        app:layout_constraintEnd_toEndOf="@+id/gridViewFotos"
+        app:layout_constraintStart_toStartOf="@+id/gridViewFotos"
+        app:layout_constraintTop_toBottomOf="@+id/cardView" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         app:cardCornerRadius="10dp"
         app:cardElevation="5dp"
@@ -49,8 +49,7 @@
 
             <ImageView
                 android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/guardiano" />
+                android:layout_height="100dp"/>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -120,21 +119,25 @@
 
     </android.support.v7.widget.CardView>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rec_fotos"
+    <GridView
+        android:id="@+id/gridViewFotos"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="160dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="100dp"
+        android:columnWidth="120dp"
+        android:gravity="center"
+        android:horizontalSpacing="10dp"
+        android:numColumns="2"
         app:layout_constraintBottom_toBottomOf="@id/cardView"
         app:layout_constraintBottom_toTopOf="@id/addStock"
         app:layout_constraintEnd_toEndOf="@+id/cardView"
         app:layout_constraintStart_toStartOf="@+id/cardView"
         app:layout_constraintTop_toTopOf="parent">
 
-    </android.support.v7.widget.RecyclerView>
+    </GridView>
 
     <Button
         android:id="@+id/addStock"

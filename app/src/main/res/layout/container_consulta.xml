@@ -16,7 +16,14 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
+        <ImageView
+            android:id="@+id/check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_check"
+            android:visibility="gone" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -27,7 +34,7 @@
             <ImageView
                 android:id="@+id/fotoFound"
                 android:layout_width="130dp"
-                android:layout_height="130dp" />
+                android:layout_height="130dp"/>
 
             <LinearLayout
                 android:layout_weight="1"

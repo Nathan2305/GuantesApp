@@ -3,7 +3,7 @@
     package="com.example.guantesapp">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -13,8 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".ActivityVenta"></activity>
+        <activity
             android:name=".AgregarImagen"
-            android:label="Agregar Diseño"></activity>
+            android:label="Agregar Diseño" />
         <activity
             android:name=".AgregarStock"
             android:label="Agregar Stock" />

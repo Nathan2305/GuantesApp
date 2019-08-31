@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    tools:context=".ActivityVenta">
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="5dp"
+            app:cardUseCompatPadding="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.842"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.014">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Modelo:" />
+
+                        <Spinner
+                            android:id="@+id/spModelo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="16dp"
+                            android:textAlignment="center"></Spinner>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Talla:" />
+
+                        <Spinner
+                            android:id="@+id/spTalla"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="34dp"
+                            android:textAlignment="center"></Spinner>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cantidad:" />
+
+                        <Spinner
+                            android:id="@+id/spCantidad"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="9dp"
+                            android:textAlignment="center"></Spinner>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/addVenta"
+            app:layout_constraintEnd_toStartOf="@+id/cardView"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/cardView"
+            app:layout_constraintTop_toBottomOf="@+id/cardView">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/addVenta"
+            style="@style/myButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:text="Confirmar Venta"
+            app:layout_constraintEnd_toStartOf="@+id/cardView"
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toEndOf="@+id/recycler"
+            app:layout_constraintTop_toBottomOf="@+id/recycler" />
+    </LinearLayout>
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/progress"
+        style="@style/SpinKitView.FadingCircle"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/translucent"
+        android:elevation="1dp"
+        android:visibility="invisible"
+        app:SpinKit_Color="@color/naranaja"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
+        app:layout_constraintHorizontal_bias="0.478"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.552" />
+
+</android.support.constraint.ConstraintLayout>

@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -25,7 +26,6 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
-import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.File;
@@ -41,10 +41,8 @@ public class AgregarStock extends AppCompatActivity {
     ArrayAdapter<CharSequence> adapter_tallas, adapter_cantidad;
     static int REQUEST_IMAGE_GALLERY = 100;
     ProgressBar progressBar;
-    RecyclerView rec_fotos;
+    GridView rec_fotos;
     String modelo;
-    RecyclerView.LayoutManager layoutManager;
-    RecyclerView.Adapter adapter;
     Button addStock;
     ConstraintLayout layoutParent;
     public static final String MY_APP = "GuantesApp";
@@ -61,9 +59,7 @@ public class AgregarStock extends AppCompatActivity {
         spinnerModelo = findViewById(R.id.sp_modelo2);
         spinnerTalla = findViewById(R.id.sp_talla2);
         spinnerCantidad = findViewById(R.id.sp_cantidad2);
-        rec_fotos = findViewById(R.id.rec_fotos);
-        layoutManager = new LinearLayoutManager(getApplicationContext());
-        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
+        rec_fotos = findViewById(R.id.gridViewFotos);
         if (modelos != null) {
             final ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, modelos);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -95,7 +91,7 @@ public class AgregarStock extends AppCompatActivity {
             }
         });
 
-        addStock.setOnClickListener(new View.OnClickListener() {
+   /*     addStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (adapter != null) {
@@ -131,7 +127,7 @@ public class AgregarStock extends AppCompatActivity {
 
                 }
             }
-        });
+        });*/
     }
 
 
@@ -149,16 +145,8 @@ public class AgregarStock extends AppCompatActivity {
                         listFoto.add(modeloChild.getImagenUrl());
                         listModelo.add(modeloChild.getNombre());
                     }
-                    adapter = new CustomAdapterforFotos(getApplicationContext(), listFoto, listModelo);
-                    rec_fotos.setLayoutManager(layoutManager);
-                    rec_fotos.setHasFixedSize(true);
-                    rec_fotos.setAdapter(adapter);
-                    ((CustomAdapterforFotos) adapter).setOnItemClickListener(new CustomAdapterforFotos.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(int position) {
-
-                        }
-                    });
+                    //adapter = new CustomAdapterforFotos(getApplicationContext(), listFoto, listModelo);
+                    rec_fotos.setAdapter(new CustomSockGridViewAdapter(AgregarStock.this,listFoto,listModelo));
                 }
                 progressBar.setVisibility(View.GONE);
             }

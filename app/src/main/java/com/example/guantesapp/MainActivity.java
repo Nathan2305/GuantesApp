@@ -9,6 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
+        invalidateOptionsMenu();
         layoutParent = findViewById(R.id.parentConstraint);
         sp_modelo = findViewById(R.id.sp_modelo);
         progress = findViewById(R.id.progressBar);
@@ -152,6 +156,8 @@ public class MainActivity extends AppCompatActivity {
                                         recFound.setAdapter(adapterTallaModeloChild);
                                         progress.setVisibility(View.GONE);
                                         disableViews(false);
+
+
                                     }
 
                                     @Override
@@ -215,6 +221,13 @@ public class MainActivity extends AppCompatActivity {
                                                     recFound.setAdapter(adapterTallaModeloChild);
                                                     progress.setVisibility(View.GONE);
                                                     disableViews(false);
+                                                    ((AdapterTallaModeloChild) adapterTallaModeloChild).setOnItemClickListener(new AdapterTallaModeloChild.OnItemClickListener() {
+                                                        @Override
+                                                        public void onItemClick(int position) {
+
+                                                        }
+                                                    });
+
                                                 }
 
                                                 @Override
@@ -327,5 +340,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.share_menu, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sell:
+                startActivity(new Intent(this,ActivityVenta.class));
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
 }

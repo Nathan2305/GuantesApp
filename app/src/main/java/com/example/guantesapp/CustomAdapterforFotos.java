@@ -19,7 +19,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
     private Context context;
     private List<String> fotoList;
     private List<String> ImageChecked = new ArrayList<>();
-    List<String> listModelo = new ArrayList<>();
+    List<String> listModelo;
     private OnItemClickListener mListener;
 
     public CustomAdapterforFotos(Context context, List<String> fotoList, List<String> listModelo) {

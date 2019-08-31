@@ -17,5 +17,9 @@
     <style name="mySpinner" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
         <item name="android:textColor">@color/naranaja</item>
     </style>
-
+    <style name="Theme.Transparent" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 </resources>
