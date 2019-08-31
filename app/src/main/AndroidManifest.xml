@@ -12,9 +12,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AgregarImagen"></activity>
-        <activity android:name=".AgregarStock" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".AgregarImagen"
+            android:label="Agregar Diseño"></activity>
+        <activity
+            android:name=".AgregarStock"
+            android:label="Agregar Stock" />
+        <activity
+            android:name=".MainActivity"
+            android:label="Consultar Modelo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

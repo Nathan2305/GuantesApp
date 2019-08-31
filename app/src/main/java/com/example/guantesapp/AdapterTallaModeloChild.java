@@ -2,6 +2,7 @@ package com.example.guantesapp;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,13 +47,27 @@ public class AdapterTallaModeloChild extends RecyclerView.Adapter<AdapterTallaMo
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView fotoFound;
         TextView tallaFound, cantidadFound, modeloFound;
+        CardView cardContainer;
+        boolean isPressed = false;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull final View itemView) {
             super(itemView);
+            cardContainer = itemView.findViewById(R.id.cardContainer);
             fotoFound = itemView.findViewById(R.id.fotoFound);
             tallaFound = itemView.findViewById(R.id.tallaFound);
             cantidadFound = itemView.findViewById(R.id.cantidadFound);
             modeloFound = itemView.findViewById(R.id.modeloFound);
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    System.out.println("Se toco mucho tiempo");
+                    itemView.setAlpha(0.5f);
+                    isPressed = true;
+                    return false;
+                }
+            });
+
         }
     }
 }

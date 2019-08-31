@@ -2,9 +2,7 @@ package com.example.guantesapp;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +22,6 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
-import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.util.ArrayList;
@@ -66,10 +63,12 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recFound.setLayoutManager(layoutManager);
         recFound.setHasFixedSize(true);
+
         fabOpen = AnimationUtils.loadAnimation(this, R.anim.fab_open);
         fabClose = AnimationUtils.loadAnimation(this, R.anim.fab_close);
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
         rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
+
         getAllModelos();
         progress.setVisibility(View.VISIBLE);
         adapter_tallas = ArrayAdapter.createFromResource(this, R.array.tallas_guantes, android.R.layout.simple_spinner_item);
@@ -93,17 +92,23 @@ public class MainActivity extends AppCompatActivity {
         fab_add_stock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fab_add_photo.startAnimation(fabClose);
-                isOpen = false;
                 startActivity(new Intent(getApplicationContext(), AgregarStock.class));
+                fab_add_photo.startAnimation(fabClose);
+                fab_add_stock.startAnimation(fabClose);
+                fab_add.startAnimation(rotateBackward);
+                isOpen = false;
+
             }
         });
         fab_add_photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fab_add_stock.startAnimation(fabClose);
-                isOpen = false;
                 startActivity(new Intent(getApplicationContext(), AgregarImagen.class));
+                fab_add_photo.startAnimation(fabClose);
+                fab_add_stock.startAnimation(fabClose);
+                fab_add.startAnimation(rotateBackward);
+                isOpen = false;
+
             }
         });
         consultar.setOnClickListener(new View.OnClickListener() {
@@ -283,14 +288,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleAnimation() {
         if (isOpen) {
-            fab_add.startAnimation(rotateForward);
+            fab_add.startAnimation(rotateBackward);
             fab_add_stock.startAnimation(fabClose);
             fab_add_photo.startAnimation(fabClose);
             fab_add_stock.setClickable(false);
             fab_add_photo.setClickable(false);
             isOpen = false;
         } else {
-            fab_add.startAnimation(rotateBackward);
+            fab_add.startAnimation(rotateForward);
             fab_add_stock.startAnimation(fabOpen);
             fab_add_photo.startAnimation(fabOpen);
             fab_add_stock.setClickable(true);
