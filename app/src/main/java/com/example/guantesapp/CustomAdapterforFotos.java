@@ -19,6 +19,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
     private Context context;
     private List<String> fotoList;
     private List<String> ImageChecked = new ArrayList<>();
+    private List<String> modeloChecked = new ArrayList<>();
     List<String> listModelo;
     private OnItemClickListener mListener;
 
@@ -30,7 +31,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
 
     @Override
     public CustomAdapterforFotos.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(this.context).inflate(R.layout.found_fotos, null);
+        View view = LayoutInflater.from(this.context).inflate(R.layout.venta_modelo_layout, null);
         return new ViewHolder(view, mListener);
     }
 
@@ -65,6 +66,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
                                 listener.onItemClick(position);
                                 found_fotos.setAlpha(0.5f);
                                 ImageChecked.add(fotoList.get(position));
+                                modeloChecked.add(listModelo.get(position));
                                 check.setVisibility(View.VISIBLE);
                                 isTouched = true;
                             }
@@ -72,6 +74,7 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
                             isTouched = false;
                             found_fotos.setAlpha(1f);
                             ImageChecked.remove(fotoList.get(position));
+                            modeloChecked.remove(listModelo.get(position));
                             check.setVisibility(View.GONE);
                         }
                     }
@@ -90,5 +93,9 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
 
     public List<String> getUrlFotosChecked() {
         return ImageChecked;
+    }
+
+    public List<String> getModeloChecked(){
+        return modeloChecked;
     }
 }

@@ -91,43 +91,42 @@ public class AgregarStock extends AppCompatActivity {
             }
         });
 
-   /*     addStock.setOnClickListener(new View.OnClickListener() {
+        addStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (adapter != null) {
-                    final List<String> fotosChecked = ((CustomAdapterforFotos) adapter).getUrlFotosChecked();
-                    final String talla = (String) spinnerTalla.getSelectedItem();
-                    final String cantidad = (String) spinnerCantidad.getSelectedItem();
-                    if (!fotosChecked.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
-                        disableViews(true);
-                        progressBar.setVisibility(View.VISIBLE);
-                        DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-                        StringBuffer stringBuffer = new StringBuffer();
-                        stringBuffer.append("imagenUrl='" + fotosChecked.get(0) + "'");
-                        queryBuilder.setWhereClause(stringBuffer.toString());
-                        Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
-                            @Override
-                            public void handleResponse(List<ModeloChild> response) {
-                                if (!response.isEmpty()) {
-                                    ModeloChild foundChild = response.get(0);
-                                    createTallaForModelChild(foundChild, talla, Integer.parseInt(cantidad));
-                                }
+                final List<String> fotosChecked = CustomSockGridViewAdapter.getUrlFotosChecked();
+                final String talla = (String) spinnerTalla.getSelectedItem();
+                final String cantidad = (String) spinnerCantidad.getSelectedItem();
+                if (!fotosChecked.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
+                    disableViews(true);
+                    progressBar.setVisibility(View.VISIBLE);
+                    DataQueryBuilder queryBuilder = DataQueryBuilder.create();
+                    StringBuffer stringBuffer = new StringBuffer();
+                    stringBuffer.append("imagenUrl='" + fotosChecked.get(0) + "'");
+                    queryBuilder.setWhereClause(stringBuffer.toString());
+                    Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
+                        @Override
+                        public void handleResponse(List<ModeloChild> response) {
+                            if (!response.isEmpty()) {
+                                ModeloChild foundChild = response.get(0);
+                                createTallaForModelChild(foundChild, talla, Integer.parseInt(cantidad));
                             }
+                        }
 
-                            @Override
-                            public void handleFault(BackendlessFault fault) {
-                                Log.i(MY_APP, "Error buscando modelo - " + fault.getMessage());
-                                disableViews(false);
-                                progressBar.setVisibility(View.GONE);
-                            }
-                        });
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Uno o más campos vacíos", Toast.LENGTH_SHORT).show();
-                    }
-
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Log.i(MY_APP, "Error buscando modelo - " + fault.getMessage());
+                            disableViews(false);
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+                } else {
+                    Toast.makeText(getApplicationContext(), "Uno o más campos vacíos", Toast.LENGTH_SHORT).show();
                 }
+
+
             }
-        });*/
+        });
     }
 
 
@@ -146,7 +145,8 @@ public class AgregarStock extends AppCompatActivity {
                         listModelo.add(modeloChild.getNombre());
                     }
                     //adapter = new CustomAdapterforFotos(getApplicationContext(), listFoto, listModelo);
-                    rec_fotos.setAdapter(new CustomSockGridViewAdapter(AgregarStock.this,listFoto,listModelo));
+
+                    rec_fotos.setAdapter(new CustomSockGridViewAdapter(AgregarStock.this, listFoto, listModelo));
                 }
                 progressBar.setVisibility(View.GONE);
             }
