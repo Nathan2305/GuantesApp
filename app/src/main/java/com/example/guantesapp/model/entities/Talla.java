@@ -1,4 +1,4 @@
-package com.example.guantesapp;
+package com.example.guantesapp.model.entities;
 
 public class Talla {
     private String tallita;

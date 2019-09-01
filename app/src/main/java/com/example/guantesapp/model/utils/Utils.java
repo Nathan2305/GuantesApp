@@ -1,12 +1,12 @@
-package com.example.guantesapp;
+package com.example.guantesapp.model.utils;
 
 import android.content.Context;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.example.guantesapp.model.entities.Modelo;
 
 import java.util.ArrayList;
 import java.util.List;

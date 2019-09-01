@@ -1,7 +1,6 @@
-package com.example.guantesapp;
+package com.example.guantesapp.model.utils;
 
 import android.content.Context;
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,12 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.guantesapp.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
 
-public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterforFotos.ViewHolder> {
+public class AdapterVenta extends RecyclerView.Adapter<AdapterVenta.ViewHolder> {
     private Context context;
     private List<String> fotoList;
     private List<String> ImageChecked = new ArrayList<>();
@@ -23,20 +24,20 @@ public class CustomAdapterforFotos extends RecyclerView.Adapter<CustomAdapterfor
     List<String> listModelo;
     private OnItemClickListener mListener;
 
-    public CustomAdapterforFotos(Context context, List<String> fotoList, List<String> listModelo) {
+    public AdapterVenta(Context context, List<String> fotoList, List<String> listModelo) {
         this.context = context;
         this.fotoList = fotoList;
         this.listModelo=listModelo;
     }
 
     @Override
-    public CustomAdapterforFotos.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public AdapterVenta.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(this.context).inflate(R.layout.venta_modelo_layout, null);
         return new ViewHolder(view, mListener);
     }
 
     @Override
-    public void onBindViewHolder(CustomAdapterforFotos.ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(AdapterVenta.ViewHolder viewHolder, int i) {
         Picasso.with(this.context).load(fotoList.get(i)).into(viewHolder.found_fotos);
         viewHolder.nameModelo.setText(listModelo.get(i));
     }

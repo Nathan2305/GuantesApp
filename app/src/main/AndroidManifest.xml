@@ -13,15 +13,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ActivityVenta"></activity>
+            android:name=".model.ui.activities.ActivityVenta"></activity>
         <activity
-            android:name=".AgregarImagen"
+            android:name=".model.ui.activities.AgregarImagen"
             android:label="Agregar Diseño" />
         <activity
-            android:name=".AgregarStock"
+            android:name=".model.ui.activities.AgregarStock"
             android:label="Agregar Stock" />
         <activity
-            android:name=".MainActivity"
+            android:name=".model.ui.activities.MainActivity"
             android:label="Consultar Modelo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

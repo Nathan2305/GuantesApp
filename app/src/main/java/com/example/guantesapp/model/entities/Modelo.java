@@ -1,11 +1,11 @@
-package com.example.guantesapp;
+package com.example.guantesapp.model.entities;
 
 
-import java.util.List;
 
-public class ModeloChild {
+
+public class Modelo {
+
     private String nombre;
-    private String imagenUrl;
     private String objectId;
 
     public String getObjectId() {
@@ -24,12 +24,5 @@ public class ModeloChild {
         this.nombre = nombre;
     }
 
-    public String getImagenUrl() {
-        return imagenUrl;
-    }
-
-    public void setImagenUrl(String imagenUrl) {
-        this.imagenUrl = imagenUrl;
-    }
 
 }

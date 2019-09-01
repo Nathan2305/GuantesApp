@@ -1,4 +1,4 @@
-package com.example.guantesapp;
+package com.example.guantesapp.model.utils;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,19 +8,21 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.guantesapp.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
 
-public class CustomSockGridViewAdapter extends BaseAdapter {
+public class AdapterAgregarStock extends BaseAdapter {
     boolean isChecked = false;
     Context context;
     List<String> fotoList;
     List<String> listModelo;
     static List<String> urlModelos = new ArrayList<>();
 
-    public CustomSockGridViewAdapter(Context context, List<String> fotoList, List<String> listModelo) {
+    public AdapterAgregarStock(Context context, List<String> fotoList, List<String> listModelo) {
         this.context = context;
         this.fotoList = fotoList;
         this.listModelo = listModelo;
@@ -60,11 +62,11 @@ public class CustomSockGridViewAdapter extends BaseAdapter {
             public void onClick(View v) {
                 if (isChecked) {
                     check.setVisibility(View.GONE);
-                    urlModelos.remove(listModelo.get(position));
+                    urlModelos.remove(fotoList.get(position));
                     isChecked = false;
                 } else {
                     check.setVisibility(View.VISIBLE);
-                    urlModelos.add(listModelo.get(position));
+                    urlModelos.add(fotoList.get(position));
                     isChecked = true;
                 }
             }
