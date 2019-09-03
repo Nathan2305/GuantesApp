@@ -9,8 +9,10 @@
     </style>
 
     <style name="myButton" parent="Widget.AppCompat.Button">
-        <item name="android:textSize">15sp</item>
-        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/blanco</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:background">@drawable/rounded_btn</item>
     </style>
 
