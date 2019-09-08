@@ -1,8 +1,7 @@
 <resources>
     <string name="app_name">GuantesApp</string>
 
-    <string-array name="modelos_guantes">
-        <item></item>
+  <!--  <string-array name="modelos_guantes">
         <item>Flash</item>
         <item>Blast</item>
         <item>Striker</item>
@@ -12,8 +11,9 @@
         <item>Premiere</item>
         <item>Profesional</item>
         <item>Guardiano</item>
-    </string-array>
-
+    </string-array>-->
+    <string name="blank">" "</string>
+    blank
 
     <string-array name="tallas_guantes">
         <item></item>

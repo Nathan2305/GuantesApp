@@ -1,6 +1,7 @@
 package com.example.guantesapp.model.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
@@ -42,4 +43,15 @@ public class Utils {
         return list[0];
     }
 
+    public static boolean positionChecked(int position) {
+        return true;
+    }
+
+    public static void unChecked(int position) {
+
+    }
+
+    public static void setChecked(int position) {
+        //SharedPreferences sharedPreferences=SharedPreferences.Editor;
+    }
 }
