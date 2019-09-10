@@ -1,14 +1,20 @@
 package com.example.guantesapp.model.utils;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +26,12 @@ import com.example.guantesapp.model.entities.ModeloChild;
 import com.example.guantesapp.model.entities.Talla;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
+
 
 public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsultaModelos.ViewHolder> {
     public Context context;
@@ -31,7 +39,7 @@ public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsulta
     private List<String> listaUrl;
     private OnItemClickListener mListener;
     public static List<ImageView> listImageViewChecked = new ArrayList<>();
-
+    private static final String TAG = AdapterConsultaModelos.class.getSimpleName();
 
     public AdapterConsultaModelos(Context context, List<Talla> listTalla, List<String> listChild) {
         this.context = context;
@@ -52,29 +60,6 @@ public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsulta
         viewHolder.tallaFound.setText(listTalla.get(i).getTallita());
         viewHolder.cantidadFound.setText(String.valueOf(listTalla.get(i).getCantidad()));
         viewHolder.modeloFound.setText(listTalla.get(i).getModelo());
-        saveBitmapsOtherThread(listaUrl.get(i), listTalla.get(i).getModelo());
-    }
-
-    public void saveBitmapsOtherThread(String urlImage, String modelo) {
-        new saveBitmap().execute(this.context, urlImage, modelo);
-    }
-
-    public class saveBitmap extends AsyncTask<Object, Void, Void> {
-        @Override
-        protected Void doInBackground(Object... objects) {
-            try {
-                Bitmap eachBitmap = Picasso.with((Context) objects[0]).load(String.valueOf(objects[1])).get();
-                MediaStore.Images.Media.insertImage(((Context) (objects[0])).getContentResolver(), eachBitmap, String.valueOf(objects[2]), "Guante Orbit");
-            } catch (IOException e) {
-                Utils.showToast((Context) objects[0], "Excepcion guardando bitmap - " + e.getMessage());
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
     }
 
     @Override
@@ -130,5 +115,6 @@ public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsulta
     public void setOnItemClickListener(AdapterConsultaModelos.OnItemClickListener listener) {
         mListener = listener;
     }
+
 
 }
