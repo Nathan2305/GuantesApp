@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -38,8 +39,7 @@ public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsulta
     private List<Talla> listTalla;
     private List<String> listaUrl;
     private OnItemClickListener mListener;
-    public static List<ImageView> listImageViewChecked = new ArrayList<>();
-    private static final String TAG = AdapterConsultaModelos.class.getSimpleName();
+    public static List<Drawable> listImagesPositionChecked = new ArrayList<>();
 
     public AdapterConsultaModelos(Context context, List<Talla> listTalla, List<String> listChild) {
         this.context = context;
@@ -67,6 +67,10 @@ public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsulta
         return listTalla.size();
     }
 
+    public String getItemModelo(int position) {
+        return listTalla.get(position).getModelo();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView fotoFound;
         ImageView check;
@@ -85,22 +89,26 @@ public class AdapterConsultaModelos extends RecyclerView.Adapter<AdapterConsulta
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int position = getAdapterPosition();
                     if (listener != null) {
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                            if (fotoFound.getAlpha() != 1f) {
-                                fotoFound.setAlpha(1f); //Deseleccionar
-                                if (position < listImageViewChecked.size()) {
-                                    listImageViewChecked.remove(position);
+                        try {
+                            int position = getAdapterPosition();
+                            if (position != RecyclerView.NO_POSITION) {
+                                listener.onItemClick(position);
+                                if (fotoFound.getAlpha() != 1f) {
+                                    fotoFound.setAlpha(1f); //Deseleccionar
                                     check.setVisibility(View.GONE);
+                                    if (listImagesPositionChecked.contains(fotoFound.getDrawable())) {
+                                        listImagesPositionChecked.remove(fotoFound.getDrawable());
+                                    }
+                                } else {
+                                    fotoFound.setAlpha(0.5f);  //Seleccionar Foto
+                                    check.setVisibility(View.VISIBLE);
+                                    //listImagesPositionChecked.add(getItemModelo(position));
+                                    listImagesPositionChecked.add(fotoFound.getDrawable());
                                 }
-                            } else {
-                                fotoFound.setAlpha(0.5f);  //Seleccionar Foto
-                                listImageViewChecked.add(fotoFound);
-                                check.setVisibility(View.VISIBLE);
                             }
-
+                        } catch (Exception e) {
+                            System.out.println("Excepcion Adapter - " + e.getMessage());
                         }
                     }
                 }

@@ -352,6 +352,8 @@ public class MainActivity extends AppCompatActivity {
                     shareIntent.setType("image/*");
                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.app_name)));
                 }
+            }else{
+                Utils.showToast(this,"Selecciona al menos una imagen para compartir");
             }
 
 
