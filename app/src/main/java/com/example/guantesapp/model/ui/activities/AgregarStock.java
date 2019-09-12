@@ -15,7 +15,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -47,6 +49,7 @@ public class AgregarStock extends AppCompatActivity {
     GridView rec_fotos;
     String modelo;
     Button addStock;
+    List<String> urlModeloSelected = new ArrayList<>();
     ConstraintLayout layoutParent;
     public static final String MY_APP = "GuantesApp";
 
@@ -97,15 +100,14 @@ public class AgregarStock extends AppCompatActivity {
         addStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final List<String> fotosChecked = AdapterAgregarStock.getUrlFotosChecked();
                 final String talla = (String) spinnerTalla.getSelectedItem();
                 final String cantidad = (String) spinnerCantidad.getSelectedItem();
-                if (!fotosChecked.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
+                if (!urlModeloSelected.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
                     disableViews(true);
                     progressBar.setVisibility(View.VISIBLE);
                     DataQueryBuilder queryBuilder = DataQueryBuilder.create();
                     StringBuffer stringBuffer = new StringBuffer();
-                    stringBuffer.append("imagenUrl='" + fotosChecked.get(0) + "'");
+                    stringBuffer.append("imagenUrl='" + urlModeloSelected.get(0) + "'");
                     queryBuilder.setWhereClause(stringBuffer.toString());
                     Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
                         @Override
@@ -126,8 +128,6 @@ public class AgregarStock extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), "Uno o más campos vacíos", Toast.LENGTH_SHORT).show();
                 }
-
-
             }
         });
     }
@@ -140,16 +140,33 @@ public class AgregarStock extends AppCompatActivity {
             @Override
             public void handleResponse(List<ModeloChild> response) {
                 if (!response.isEmpty()) {
-                    List<String> listFoto = new ArrayList<>();
+                    List<String> listUrlModelos = new ArrayList<>();
                     List<String> listModelo = new ArrayList<>();
 
                     for (ModeloChild modeloChild : response) {
-                        listFoto.add(modeloChild.getImagenUrl());
+                        listUrlModelos.add(modeloChild.getImagenUrl());
                         listModelo.add(modeloChild.getNombre());
                     }
-                    //adapter = new AdapterVenta(getApplicationContext(), listFoto, listModelo);
+                    rec_fotos.setAdapter(new AdapterAgregarStock(AgregarStock.this, listUrlModelos, listModelo));
+                    rec_fotos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            ImageView check = view.findViewById(R.id.check);
+                            ImageView found_fotos = view.findViewById(R.id.found_fotos);
+                            if (found_fotos.getAlpha() != 1f) {
+                                found_fotos.setAlpha(1f); //Deseleccionar
+                                check.setVisibility(View.GONE);
+                                if (urlModeloSelected.contains((String) parent.getItemAtPosition(position))){
+                                    urlModeloSelected.remove((String)parent.getItemAtPosition(position));
+                                }
 
-                    rec_fotos.setAdapter(new AdapterAgregarStock(AgregarStock.this, listFoto, listModelo));
+                            } else {
+                                found_fotos.setAlpha(0.5f);
+                                check.setVisibility(View.VISIBLE);
+                                urlModeloSelected.add((String) parent.getItemAtPosition(position));
+                            }
+                        }
+                    });
                 }
                 progressBar.setVisibility(View.GONE);
             }
@@ -218,6 +235,7 @@ public class AgregarStock extends AppCompatActivity {
                                             Utils.showToast(getApplicationContext(), "Se creó stock para modelo " +
                                                     modeloChild.getNombre() + " y talla " + tallaCreated.getTallita());
                                             progressBar.setVisibility(View.GONE);
+                                            urlModeloSelected.clear();
                                             disableViews(false);
                                         }
 
@@ -246,6 +264,7 @@ public class AgregarStock extends AppCompatActivity {
                         public void handleResponse(Integer response) {
                             Utils.showToast(getApplicationContext(), "Se actualizó el stock para modelo " + modeloChild.getNombre() + " y talla " + talla);
                             progressBar.setVisibility(View.GONE);
+                            urlModeloSelected.clear();
                             disableViews(false);
                         }
 

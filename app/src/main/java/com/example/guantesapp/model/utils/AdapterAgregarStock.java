@@ -18,29 +18,29 @@ import it.sephiroth.android.library.picasso.Picasso;
 public class AdapterAgregarStock extends BaseAdapter {
     boolean isChecked = false;
     Context context;
-    List<String> fotoList;
+    List<String> listUrlModelos;
     List<String> listModelo;
     static List<String> urlModelos = new ArrayList<>();
 
-    public AdapterAgregarStock(Context context, List<String> fotoList, List<String> listModelo) {
+    public AdapterAgregarStock(Context context, List<String> listUrlModelos, List<String> listModelo) {
         this.context = context;
-        this.fotoList = fotoList;
+        this.listUrlModelos = listUrlModelos;
         this.listModelo = listModelo;
     }
 
     @Override
     public int getCount() {
-        return fotoList.size();
+        return listUrlModelos.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return fotoList.get(position);
+    public String getItem(int position) {
+        return listUrlModelos.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return fotoList.get(position).getBytes().length;
+        return listUrlModelos.get(position).getBytes().length;
     }
 
     @Override
@@ -55,27 +55,13 @@ public class AdapterAgregarStock extends BaseAdapter {
         ImageView found_fotos = convertView.findViewById(R.id.found_fotos);
         final ImageView check = convertView.findViewById(R.id.check);
         TextView nameModelo = convertView.findViewById(R.id.nameModelo);
-        Picasso.with(context).load(fotoList.get(position)).into(found_fotos);
+        Picasso.with(context).load(listUrlModelos.get(position)).into(found_fotos);
         nameModelo.setText(listModelo.get(position));
-        found_fotos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isChecked) {
-                    check.setVisibility(View.GONE);
-                    urlModelos.remove(fotoList.get(position));
-                    isChecked = false;
-                } else {
-                    check.setVisibility(View.VISIBLE);
-                    urlModelos.add(fotoList.get(position));
-                    isChecked = true;
-                }
-            }
-        });
 
         return convertView;
     }
 
-    public static List<String> getUrlFotosChecked(){
+    public static List<String> getUrlFotosChecked() {
         return urlModelos;
     }
 }
