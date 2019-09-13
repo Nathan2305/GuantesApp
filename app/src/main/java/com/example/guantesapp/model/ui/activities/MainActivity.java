@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                                                 for (ModeloChild modeloChild : response) {
                                                     if (modeloChild.getNombre().equalsIgnoreCase(tallita.getModelo())) {
                                                         modelosUrl.add(modeloChild.getImagenUrl());
-                                                       //saveBitmapsOtherThread(modeloChild.getImagenUrl(), tallita.getModelo());
+                                                        //saveBitmapsOtherThread(modeloChild.getImagenUrl(), tallita.getModelo());
                                                     }
                                                 }
                                             }
@@ -229,16 +229,25 @@ public class MainActivity extends AppCompatActivity {
                     });
                 } else {
                     sb.append(" nombre like '" + modelo + "%'")
-                            .append(" and talla.tallita!=null");
+                            .append(" and talla.tallita!=null and talla.cantidad>0");
                     dataQueryBuilder.setWhereClause(sb.toString());
-
+                    dataQueryBuilder.setSortBy(" nombre ASC");
                     Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
                         @Override
                         public void handleResponse(List<ModeloChild> response) {
                             if (!response.isEmpty()) {
                                 listModeloChild = response;
                                 DataQueryBuilder dataQ = DataQueryBuilder.create();
-                                dataQ.setWhereClause("cantidad>0");
+                                StringBuilder sb = new StringBuilder();
+                                for (int k = 0; k < listModeloChild.size(); k++) {
+                                    if (k == listModeloChild.size() - 1) {
+                                        sb.append("modelo='" + listModeloChild.get(k).getNombre() + "'");
+                                    } else {
+                                        sb.append("modelo='" + listModeloChild.get(k).getNombre() + "' or ");
+                                    }
+                                }
+                                dataQ.setWhereClause(sb.toString());
+                                dataQ.setSortBy( "modelo ASC");
                                 dataQ.setPageSize(50);
                                 Backendless.Data.of(Talla.class).find(dataQ, new AsyncCallback<List<Talla>>() {
                                     @Override
@@ -252,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             }
                                             Backendless.Data.of(ModeloChild.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloChild>>() {
+
                                                 @Override
                                                 public void handleResponse(List<ModeloChild> response) {
                                                     if (!response.isEmpty()) {
@@ -320,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
             requestPermissionWrite();
         } else {
             if (listImagesPositionChecked.size() > 0) {
-                if (listImagesPositionChecked.size() <=1) {
+                if (listImagesPositionChecked.size() <= 1) {
                     Drawable mDrawable = listImagesPositionChecked.get(0);
                     Bitmap mBitmap = ((BitmapDrawable) mDrawable).getBitmap();
                     try {
@@ -352,8 +362,8 @@ public class MainActivity extends AppCompatActivity {
                     shareIntent.setType("image/*");
                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.app_name)));
                 }
-            }else{
-                Utils.showToast(this,"Selecciona al menos una imagen para compartir");
+            } else {
+                Utils.showToast(this, "Selecciona al menos una imagen para compartir");
             }
 
 
