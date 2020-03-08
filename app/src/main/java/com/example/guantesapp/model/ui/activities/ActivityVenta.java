@@ -11,22 +11,12 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
-import com.backendless.Backendless;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.DataQueryBuilder;
 import com.example.guantesapp.model.utils.AdapterVenta;
-import com.example.guantesapp.model.entities.ModeloChild;
 import com.example.guantesapp.R;
-import com.example.guantesapp.model.entities.Talla;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static com.example.guantesapp.model.ui.activities.MainActivity.modelos;
+import static com.example.guantesapp.model.ui.activities.MainActivity.listaGuantes;
 
 public class ActivityVenta extends AppCompatActivity {
 
@@ -62,8 +52,8 @@ public class ActivityVenta extends AppCompatActivity {
         adapter_cantidad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCantidad.setAdapter(adapter_cantidad);
 
-        if (modelos != null) {
-            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, modelos);
+        if (listaGuantes != null) {
+            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spModelo.setAdapter(adapter_modelos);
         }
@@ -88,7 +78,7 @@ public class ActivityVenta extends AppCompatActivity {
                 if (adapter != null) {
                     try {
                         if (!((AdapterVenta) adapter).getModeloChecked().isEmpty()){
-                            String modeloChecked = ((AdapterVenta) adapter).getModeloChecked().get(0);
+                           /* String modeloChecked = ((AdapterVenta) adapter).getModeloChecked().get(0);
                             String talla = (String) spTalla.getSelectedItem();
                             final String cantidad = (String) spCantidad.getSelectedItem();
                             if (!talla.isEmpty() && !cantidad.isEmpty() && !modeloChecked.isEmpty()) {
@@ -125,7 +115,7 @@ public class ActivityVenta extends AppCompatActivity {
                                 });
                             } else {
                                 Utils.showToast(getApplicationContext(), "Selecciona modelo, talla y cantidad..");
-                            }
+                            }*/
                         }else{
                             Utils.showToast(getApplicationContext(), "No hay modelos seleccionados");
                         }
@@ -145,7 +135,7 @@ public class ActivityVenta extends AppCompatActivity {
 
 
     private void showModelos(final String modelo) {
-        progressBar.setVisibility(View.VISIBLE);
+        /*progressBar.setVisibility(View.VISIBLE);
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("nombre like '" + modelo + "%'")
@@ -181,7 +171,7 @@ public class ActivityVenta extends AppCompatActivity {
                 Utils.showToast(getApplicationContext(), "Algo salió mal buscando modelo " + modelo + " : " + fault.getMessage());
                 progressBar.setVisibility(View.GONE);
             }
-        });
+        });*/
 
     }
 }

@@ -10,36 +10,18 @@ import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.Toast;
 
-import com.backendless.Backendless;
-import com.backendless.async.callback.AsyncCallback;
-import com.backendless.exceptions.BackendlessFault;
-import com.backendless.persistence.DataQueryBuilder;
-import com.example.guantesapp.model.utils.AdapterAgregarStock;
-import com.example.guantesapp.model.entities.ModeloChild;
 import com.example.guantesapp.R;
-import com.example.guantesapp.model.entities.Talla;
-import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import static com.example.guantesapp.model.ui.activities.MainActivity.modelos;
 
 public class AgregarStock extends AppCompatActivity {
     Spinner spinnerModelo, spinnerTalla, spinnerCantidad;
@@ -66,7 +48,7 @@ public class AgregarStock extends AppCompatActivity {
         spinnerTalla = findViewById(R.id.sp_talla2);
         spinnerCantidad = findViewById(R.id.sp_cantidad2);
         rec_fotos = findViewById(R.id.gridViewFotos);
-        if (modelos != null) {
+       /* if (modelos != null) {
             final ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, modelos);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerModelo.setAdapter(adapter_modelos);
@@ -129,11 +111,11 @@ public class AgregarStock extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Uno o más campos vacíos", Toast.LENGTH_SHORT).show();
                 }
             }
-        });
+        });*/
     }
 
 
-    private void showModelos(final String modelo) {
+    /*private void showModelos(final String modelo) {
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
         queryBuilder.setWhereClause("nombre like '" + modelo + "%'");
         Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
@@ -179,7 +161,7 @@ public class AgregarStock extends AppCompatActivity {
         });
 
     }
-
+*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -202,7 +184,7 @@ public class AgregarStock extends AppCompatActivity {
     }
 
 
-    private void createTallaForModelChild(final ModeloChild modeloChild, final String talla, final int cantidad) {
+ /*   private void createTallaForModelChild(final ModeloChild modeloChild, final String talla, final int cantidad) {
         final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("modelo ='" + modeloChild.getNombre() + "'")
@@ -285,7 +267,7 @@ public class AgregarStock extends AppCompatActivity {
                 disableViews(false);
             }
         });
-    }
+    }*/
 
     public void disableViews(boolean val) {
         if (val) {

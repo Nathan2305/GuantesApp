@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    tools:context=".model.ui.activities.AgregarImagen">
+    tools:context=".model.ui.activities.AgregarModelo">
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -109,14 +109,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="Agregar Foto" />
+            android:text="Agregar Modelo" />
     </LinearLayout>
 
     <com.github.ybq.android.spinkit.SpinKitView
         android:id="@+id/progress"
         style="@style/SpinKitView.FadingCircle"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_margin="20dp"
         android:backgroundTint="@color/translucent"
         android:visibility="gone"

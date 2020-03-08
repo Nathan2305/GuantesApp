@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -31,22 +32,22 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
-import com.backendless.persistence.DataQueryBuilder;
+import com.example.guantesapp.model.entities.Guante;
 import com.example.guantesapp.model.entities.Modelo;
-import com.example.guantesapp.model.entities.ModeloChild;
 import com.example.guantesapp.R;
+import com.example.guantesapp.model.entities.ModeloRoomDB;
+import com.example.guantesapp.model.utils.GuantesDataBase;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.List;
 
 import static com.example.guantesapp.model.ui.activities.AgregarStock.REQUEST_IMAGE_GALLERY;
-import static com.example.guantesapp.model.ui.activities.MainActivity.modelos;
+import static com.example.guantesapp.model.ui.activities.MainActivity.listaGuantes;
 
-public class AgregarImagen extends AppCompatActivity {
+public class AgregarModelo extends AppCompatActivity {
 
     ImageView foto_guante;
     Button btn_save;
@@ -55,6 +56,7 @@ public class AgregarImagen extends AppCompatActivity {
     CheckBox checkNuevo;
     boolean imageEmpty = true;
     TextView textViewNuevo;
+    boolean newModel = false;
     EditText nuevoModelo;
     Bitmap selectedImage;
     ProgressBar progress;
@@ -71,8 +73,8 @@ public class AgregarImagen extends AppCompatActivity {
         Sprite doubleBounce = new FadingCircle();
         progress.setProgressDrawable(doubleBounce);
         spinnerModelo = findViewById(R.id.name_foto);
-        if (modelos != null) {
-            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, modelos);
+        if (listaGuantes != null) {
+            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerModelo.setAdapter(adapter_modelos);
         }
@@ -107,22 +109,22 @@ public class AgregarImagen extends AppCompatActivity {
             public void onClick(View v) {
                 if (!imageEmpty) {
                     progress.setVisibility(View.VISIBLE);
-                    final String nameFoto;
+                    String nombreModelo;
                     File fileToUpload = new File(pathImage);
                     if (!checkNuevo.isChecked()) {
-                        nameFoto = spinnerModelo.getSelectedItem().toString();
+                        nombreModelo = spinnerModelo.getSelectedItem().toString();
                     } else {
-                        nameFoto = nuevoModelo.getText().toString();
+                        nombreModelo = nuevoModelo.getText().toString();
+                        newModel = true;
                     }
-                    if (!nameFoto.isEmpty()) {
-                        saveImageFile(fileToUpload, pathRemote, nameFoto);
+                    if (!nombreModelo.isEmpty()) {
+                        saveImageFile(fileToUpload, pathRemote, nombreModelo);
                     } else {
                         Utils.showToast(getApplicationContext(), "Ingresa el nombre del modelo...");
                         progress.setVisibility(View.GONE);
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Seleccion una imagen...",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Seleccion una imagen...", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -134,7 +136,9 @@ public class AgregarImagen extends AppCompatActivity {
         Backendless.Files.upload(fileToUpload, pathRemote, new AsyncCallback<BackendlessFile>() {
             @Override
             public void handleResponse(BackendlessFile response) {
-                saveModeloChild(response.getFileURL(), modelo);
+                //Se guardó la imagen
+                foto_guante.setImageDrawable(getResources().getDrawable(R.drawable.ic_cloud_upload_black_24dp));
+                guardarTablaModelo(response.getFileURL(), modelo);
             }
 
             @Override
@@ -146,86 +150,105 @@ public class AgregarImagen extends AppCompatActivity {
         });
     }
 
-    private void saveModeloChild(String imageUrl, final String nombre) {
+    private void guardarTablaModelo(String imageUrl, final String nombre) {
+        //Guardar en tabla Modelo
+        final Guante guante = new Guante(nombre);
+        if (newModel) { //Se debe guardar en tablas Modelo y Guante
+            ModeloRoomDB modeloRoomDB = new ModeloRoomDB();
+            modeloRoomDB.setId(nombre);
+            modeloRoomDB.setOrden(0);
+            saveModelIntoSQLite(modeloRoomDB);
 
-        final ModeloChild modeloChild = new ModeloChild();
-        modeloChild.setImagenUrl(imageUrl);
-
-        Modelo modeloPadre = new Modelo();
-        modeloPadre.setNombre(nombre);
-
-        Backendless.Data.of(Modelo.class).save(modeloPadre, new AsyncCallback<Modelo>() {
-            @Override
-            public void handleResponse(Modelo response) {
-                DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-                queryBuilder.setPageSize(70);
-                Backendless.Data.of(ModeloChild.class).find(queryBuilder,new AsyncCallback<List<ModeloChild>>() {
+            String nom_modelo = guante.getName() + "-" + modeloRoomDB.getOrden();
+            final Modelo modelo = new Modelo(nom_modelo);
+            modelo.setFoto_url(imageUrl);
+            try {
+                Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
                     @Override
-                    public void handleResponse(List<ModeloChild> response) {
-                        if (!response.isEmpty()) {
-                            int size = response.size();
-                            modeloChild.setNombre(nombre + size);
-                        } else {
-                            modeloChild.setNombre(nombre);
-                        }
-                        saveChildwithName(modeloChild);
+                    public void handleResponse(Modelo response) {
+                        //Utils.showToast(AgregarModelo.this, "Se guardó el modelo " + response.getName() + " correctamente");
+                        guardarTablaGuante(guante.getName());
                     }
 
                     @Override
                     public void handleFault(BackendlessFault fault) {
-                        Utils.showToast(getApplicationContext(), "Algo salió mal buscando ModeloChild - " + fault.getMessage());
-                        progress.setVisibility(View.GONE);
+                        Utils.showToast(AgregarModelo.this, "Algo salió mal guardando modelo " + modelo.getName());
                     }
                 });
+                progress.setVisibility(View.GONE);
+            } catch (Exception e) {
+                System.out.println("Excepcion : " + e.getMessage());
+            }
+        } else { //Guardar en tabla Modelo , Obtener orden en Room
+            getModeloFromRoomDBSaveBknd(new String[]{guante.getName(), imageUrl});
+            progress.setVisibility(View.GONE);
+        }
+
+    }
+
+    private void guardarTablaGuante(final String nombre) {
+        Guante guante = new Guante(nombre);
+        Backendless.Data.of(Guante.class).save(guante, new AsyncCallback<Guante>() {
+            @Override
+            public void handleResponse(Guante response) {
+                Utils.showToast(AgregarModelo.this, "Se guardó el Guante " + response.getName() + " correctamente");
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                if ("1155".equalsIgnoreCase(fault.getCode())){
-                    DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-                    queryBuilder.setPageSize(70);
-                    Backendless.Data.of(ModeloChild.class).find(queryBuilder,new AsyncCallback<List<ModeloChild>>() {
-                        @Override
-                        public void handleResponse(List<ModeloChild> response) {
-                            if (!response.isEmpty()) {
-                                int size = response.size();
-                                modeloChild.setNombre(nombre + size);
-                            } else {
-                                modeloChild.setNombre(nombre);
-                            }
-                            saveChildwithName(modeloChild);
-                        }
-
-                        @Override
-                        public void handleFault(BackendlessFault fault) {
-                            Utils.showToast(getApplicationContext(), "Algo salió mal buscando ModeloChild - " + fault.getMessage());
-                            progress.setVisibility(View.GONE);
-                        }
-                    });
-                }else{
-                    Utils.showToast(getApplicationContext(), "Algo salió mal guardando ModeloPadre - " + fault.getMessage());
-                    progress.setVisibility(View.GONE);
-                }
-
+                Utils.showToast(AgregarModelo.this, "No se guardó el Guante " + nombre + " correctamente");
             }
         });
     }
 
-    private void saveChildwithName(ModeloChild modeloChild) {
-        Backendless.Data.of(ModeloChild.class).save(modeloChild, new AsyncCallback<ModeloChild>() {
-            @Override
-            public void handleResponse(ModeloChild response) {
-                Utils.showToast(getApplicationContext(), "Se guardó el modelo por completo");
-                foto_guante.setImageResource(R.drawable.ic_cloud_upload_black_24dp);
-                progress.setVisibility(View.GONE);
-            }
+    private void saveModelIntoSQLite(ModeloRoomDB modeloRoomDB) {
+        new TaskSaveModelRoom().execute(modeloRoomDB);
+    }
 
-            @Override
-            public void handleFault(BackendlessFault fault) {
-                Utils.showToast(getApplicationContext(), "Algo salió mal guardando ModeloChild - " + fault.getMessage());
-                progress.setVisibility(View.GONE);
+    private void getModeloFromRoomDBSaveBknd(String[] strings) {
+        new TaskgetModeloFromRoom().execute(strings);
+    }
+
+    public class TaskgetModeloFromRoom extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                String name = strings[0];
+                String imageUrl = strings[1];
+                int ordenByModel = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().getOrdenById(name);
+                if (ordenByModel >= 0) {
+                    ordenByModel++;
+                    ModeloRoomDB modeloRoomDB = new ModeloRoomDB();
+                    modeloRoomDB.setId(name);
+                    modeloRoomDB.setOrden(ordenByModel);
+                    GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().updateOrden(modeloRoomDB);
+
+                    int newordenToSave = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().getOrdenById(name);
+
+                    Modelo modelo = new Modelo();
+                    modelo.setModelo(modeloRoomDB.getId() + "-" + newordenToSave);
+                    modelo.setFoto_url(imageUrl);
+                    Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
+                        @Override
+                        public void handleResponse(Modelo response) {
+                            System.out.println("Se guardó modelo ya existente");
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            System.out.println("No se guardó modelo ya existente");
+                        }
+                    });
+                    progress.setVisibility(View.GONE);
+
+                }
+            } catch (Exception e) {
+                System.out.println("Exececiopmn Room :" + e.getMessage());
+
             }
-        });
+            return null;
+        }
     }
 
     private void checkPermissionGallery() {
@@ -290,5 +313,19 @@ public class AgregarImagen extends AppCompatActivity {
             return cursor.getString(column_index);
         }
         return imageUri.getPath();
+    }
+
+
+    public class TaskSaveModelRoom extends AsyncTask<ModeloRoomDB, Void, Void> {
+        @Override
+        protected Void doInBackground(ModeloRoomDB... modeloRoomDBS) {
+            long id = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().insertModeloRoom(modeloRoomDBS[0]);
+            if (id > -1L) {
+                System.out.println("Se guardó el modelo en RoomDB");
+            } else {
+                System.out.println("No se guardó el modelo en RoomDB");
+            }
+            return null;
+        }
     }
 }

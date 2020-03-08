@@ -16,7 +16,7 @@
         <activity
             android:name=".model.ui.activities.ActivityVenta"></activity>
         <activity
-            android:name=".model.ui.activities.AgregarImagen"
+            android:name=".model.ui.activities.AgregarModelo"
             android:label="Agregar Diseño" />
         <activity
             android:name=".model.ui.activities.AgregarStock"
