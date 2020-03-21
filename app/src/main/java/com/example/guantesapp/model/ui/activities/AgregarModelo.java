@@ -10,11 +10,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -36,6 +38,7 @@ import com.example.guantesapp.model.entities.Guante;
 import com.example.guantesapp.model.entities.Modelo;
 import com.example.guantesapp.R;
 import com.example.guantesapp.model.entities.ModeloRoomDB;
+import com.example.guantesapp.model.entities.ModeloUrlRoomDB;
 import com.example.guantesapp.model.utils.GuantesDataBase;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.sprite.Sprite;
@@ -153,21 +156,21 @@ public class AgregarModelo extends AppCompatActivity {
     private void guardarTablaModelo(String imageUrl, final String nombre) {
         //Guardar en tabla Modelo
         final Guante guante = new Guante(nombre);
-        if (newModel) { //Se debe guardar en tablas Modelo y Guante
-            ModeloRoomDB modeloRoomDB = new ModeloRoomDB();
-            modeloRoomDB.setId(nombre);
-            modeloRoomDB.setOrden(0);
-            saveModelIntoSQLite(modeloRoomDB);
-
-            String nom_modelo = guante.getName() + "-" + modeloRoomDB.getOrden();
-            final Modelo modelo = new Modelo(nom_modelo);
-            modelo.setFoto_url(imageUrl);
+        if (newModel) { //Se debe guardar en tablas Modelo y Guante Modelo-01234
             try {
+                ModeloRoomDB modeloRoomDB = new ModeloRoomDB();
+                modeloRoomDB.setId(nombre);
+                modeloRoomDB.setOrden(0);
+                saveModelIntoSQLite(modeloRoomDB);
+                final String nom_modeloFull = guante.getName() + "-" + modeloRoomDB.getOrden();
+                final Modelo modelo = new Modelo(nom_modeloFull);
+                modelo.setFoto_url(imageUrl);
+
                 Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
                     @Override
                     public void handleResponse(Modelo response) {
-                        //Utils.showToast(AgregarModelo.this, "Se guardó el modelo " + response.getName() + " correctamente");
-                        guardarTablaGuante(guante.getName());
+                        Utils.showToast(AgregarModelo.this, "Se guardó el modelo " + response.getName() + " correctamente");
+                        guardarTablaGuante(guante.getName(), modelo.getModelo(), modelo.getFoto_url());
                     }
 
                     @Override
@@ -186,12 +189,16 @@ public class AgregarModelo extends AppCompatActivity {
 
     }
 
-    private void guardarTablaGuante(final String nombre) {
+    private void guardarTablaGuante(final String nombre, final String modeloFullIntoroom, final String fotoUrlIntoRoom) {
         Guante guante = new Guante(nombre);
         Backendless.Data.of(Guante.class).save(guante, new AsyncCallback<Guante>() {
             @Override
             public void handleResponse(Guante response) {
                 Utils.showToast(AgregarModelo.this, "Se guardó el Guante " + response.getName() + " correctamente");
+                ModeloUrlRoomDB modeloUrlRoomDB = new ModeloUrlRoomDB();
+                modeloUrlRoomDB.setModelo(modeloFullIntoroom);
+                modeloUrlRoomDB.setFoto_url(fotoUrlIntoRoom);
+                Utils.insertModeloUrl(getApplicationContext(), modeloUrlRoomDB);
             }
 
             @Override
@@ -210,12 +217,11 @@ public class AgregarModelo extends AppCompatActivity {
     }
 
     public class TaskgetModeloFromRoom extends AsyncTask<String, Void, Void> {
-
         @Override
         protected Void doInBackground(String... strings) {
             try {
                 String name = strings[0];
-                String imageUrl = strings[1];
+                String fotoUrl = strings[1];
                 int ordenByModel = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().getOrdenById(name);
                 if (ordenByModel >= 0) {
                     ordenByModel++;
@@ -228,7 +234,7 @@ public class AgregarModelo extends AppCompatActivity {
 
                     Modelo modelo = new Modelo();
                     modelo.setModelo(modeloRoomDB.getId() + "-" + newordenToSave);
-                    modelo.setFoto_url(imageUrl);
+                    modelo.setFoto_url(fotoUrl);
                     Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
                         @Override
                         public void handleResponse(Modelo response) {
@@ -319,12 +325,17 @@ public class AgregarModelo extends AppCompatActivity {
     public class TaskSaveModelRoom extends AsyncTask<ModeloRoomDB, Void, Void> {
         @Override
         protected Void doInBackground(ModeloRoomDB... modeloRoomDBS) {
-            long id = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().insertModeloRoom(modeloRoomDBS[0]);
-            if (id > -1L) {
-                System.out.println("Se guardó el modelo en RoomDB");
-            } else {
-                System.out.println("No se guardó el modelo en RoomDB");
+            try {
+                long id = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().insertModeloRoom(modeloRoomDBS[0]);
+                if (id > -1L) {
+                    System.out.println("Se guardó el modelo en RoomDB");
+                } else {
+                    System.out.println("No se guardó el modelo en RoomDB");
+                }
+            }catch (Exception e){
+                System.out.println("Excepcion - TaskSaveModelRoom method - "+e.getMessage());
             }
+
             return null;
         }
     }

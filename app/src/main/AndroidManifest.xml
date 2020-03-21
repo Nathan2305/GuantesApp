@@ -17,7 +17,7 @@
             android:name=".model.ui.activities.ActivityVenta"></activity>
         <activity
             android:name=".model.ui.activities.AgregarModelo"
-            android:label="Agregar Diseño" />
+            android:label="Agregar Modelo" />
         <activity
             android:name=".model.ui.activities.AgregarStock"
             android:label="Agregar Stock" />

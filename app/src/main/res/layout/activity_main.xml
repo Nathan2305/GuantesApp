@@ -1,360 +1,241 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/bgLayout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parentConstraint"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/parentConstraint"
+    android:layout_height="match_parent"
+    tools:context=".model.ui.activities.MainActivity">
+
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/progressBar"
+        style="@style/SpinKitView.FadingCircle"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="8dp"
+        android:backgroundTint="@color/translucent"
+        android:elevation="1dp"
+        android:visibility="invisible"
+        app:SpinKit_Color="@color/naranaja"
+        app:layout_constraintBottom_toTopOf="@+id/fab_add"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout3" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".model.ui.activities.MainActivity">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-
-        <com.github.ybq.android.spinkit.SpinKitView
-            android:id="@+id/progressBar"
-            style="@style/SpinKitView.FadingCircle"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="@color/translucent"
-            android:elevation="1dp"
-            android:visibility="invisible"
-            app:SpinKit_Color="@color/naranaja"
-            app:layout_constraintBottom_toTopOf="@+id/fab_add"
-            app:layout_constraintEnd_toEndOf="@+id/recFound"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/recFound"
-            app:layout_constraintTop_toBottomOf="@+id/cardViewd"
-            app:layout_constraintVertical_bias="0.559" />
-
-
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:id="@+id/cardViewd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="10dp"
-            app:cardUseCompatPadding="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.842"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.014">
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="2dp">
 
-                <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/ic_search" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp">
+
+                    <Button
+                        android:onClick="clickBtnTalla"
+                        android:id="@+id/btn7"
+                        style="@style/tallaBtn"
+                        android:text="7"
+                        app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/linearLayout4" />
+
+                    <LinearLayout
+                        android:id="@+id/linearLayout4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.5"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="7dp"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:onClick="clickBtnTalla"
+                                android:id="@+id/btn4"
+                                style="@style/tallaBtn"
+                                android:layout_marginTop="30dp"
+                                android:text="4" />
+
+                            <Button
+                                android:onClick="clickBtnTalla"
+                                android:id="@+id/btn5"
+                                style="@style/tallaBtn"
+                                android:text="5" />
+
+                            <Button
+                                android:onClick="clickBtnTalla"
+                                android:id="@+id/btn6"
+                                style="@style/tallaBtn"
+                                android:layout_marginTop="30dp"
+                                android:text="6" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:onClick="clickBtnTalla"
+                                android:id="@+id/btn8"
+                                style="@style/tallaBtn"
+                                android:text="8" />
+
+                            <Button
+                                android:onClick="clickBtnTalla"
+                                android:id="@+id/btn9"
+                                style="@style/tallaBtn"
+                                android:layout_marginTop="30dp"
+                                android:text="9" />
+
+                            <Button
+                                android:onClick="clickBtnTalla"
+                                android:id="@+id/btn10"
+                                style="@style/tallaBtn"
+                                android:text="10" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
+                    android:layout_gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="10dp">
+                    android:padding="5dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/txtModelo"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        style="@style/txtViewGral"
+                        android:text="Modelo"/>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Modelo" />
-
-                        <Spinner
-                            android:id="@+id/sp_modelo"
-                            style="@style/mySpinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"></Spinner>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <Spinner
+                        android:id="@+id/sp_modelo"
+                        style="@style/mySpinner"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:orientation="horizontal">
+                        android:padding="5dp"
+                        android:textAlignment="textStart" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Talla" />
 
-                        <Spinner
-                            android:id="@+id/sp_talla"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"></Spinner>
-                    </LinearLayout>
+                    <CheckBox
+                        android:id="@+id/checkModelos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="Todos los modelos" />
 
                     <Button
                         android:id="@+id/consultar"
                         style="@style/myButton"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:fontFamily="monospace"
                         android:text="Consultar" />
                 </LinearLayout>
+
 
             </LinearLayout>
 
 
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
 
         <GridView
             android:id="@+id/recFound"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:numColumns="2"
-            android:layout_marginTop="170dp"
             android:columnWidth="200dp"
             android:gravity="center"
-            android:layout_marginBottom="80dp"
-            android:padding="10dp"
-            app:layout_constraintEnd_toEndOf="@+id/cardViewd"
-            app:layout_constraintStart_toStartOf="@+id/cardViewd"
-            tools:layout_editor_absoluteY="100dp">
+            android:numColumns="2"
+            android:padding="8dp">
 
         </GridView>
+    </LinearLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_add"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.51"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.962" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/naranaja"
-            android:clickable="true"
-            android:src="@drawable/ic_cloud_upload_black_24dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/fab_add"
-            app:layout_constraintEnd_toStartOf="@+id/fab_add"
-            app:layout_constraintHorizontal_bias="0.816"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/fab_add"
-            app:layout_constraintVertical_bias="1.0" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_add_stock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/celeste"
-            android:clickable="true"
-            android:src="@drawable/ic_add_stock"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@+id/fab_add"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.166"
-            app:layout_constraintStart_toEndOf="@+id/fab_add"
-            app:layout_constraintTop_toTopOf="@+id/fab_add"
-            app:layout_constraintVertical_bias="0.0" />
-    </android.support.constraint.ConstraintLayout>
-
-   <!-- <LinearLayout
-        android:id="@+id/bottom_sheet1"
-        android:layout_width="match_parent"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+        android:src="@drawable/ic_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.962" />
 
-        <FrameLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:background="@android:color/transparent"
-            android:orientation="vertical">
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/naranaja"
+        android:clickable="true"
+        android:src="@drawable/ic_cloud_upload_black_24dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_add"
+        app:layout_constraintEnd_toStartOf="@+id/fab_add"
+        app:layout_constraintHorizontal_bias="0.816"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/fab_add"
+        app:layout_constraintVertical_bias="1.0" />
 
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/congratulation_card"
-                android:layout_width="match_parent"
-                android:layout_height="350dp"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="32dp">
-
-                <android.support.v7.widget.CardView
-                    android:id="@+id/cardView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="80dp"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="5dp"
-                    app:cardUseCompatPadding="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.842"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.014">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="5dp">
-
-                        <ImageView
-                            android:layout_width="100dp"
-                            android:layout_height="100dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:padding="5dp">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Modelo:" />
-
-                                <Spinner
-                                    android:id="@+id/spModelo"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="16dp"
-                                    android:textAlignment="center"></Spinner>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Talla:" />
-
-                                <Spinner
-                                    android:id="@+id/spTalla"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="34dp"
-                                    android:textAlignment="center"></Spinner>
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Cantidad:" />
-
-                                <Spinner
-                                    android:id="@+id/spCantidad"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="9dp"
-                                    android:textAlignment="center"></Spinner>
-                            </LinearLayout>
-
-                        </LinearLayout>
-                    </LinearLayout>
-
-
-                </android.support.v7.widget.CardView>
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="150dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="80dp"
-                    app:layout_constraintBottom_toTopOf="@+id/addVenta"
-                    app:layout_constraintEnd_toStartOf="@+id/cardView"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/cardView"
-                    app:layout_constraintTop_toBottomOf="@+id/cardView">
-
-                </android.support.v7.widget.RecyclerView>
-
-                <Button
-                    android:id="@+id/addVenta"
-                    style="@style/myButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Confirmar Venta"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/cardView"
-                    app:layout_constraintHorizontal_bias="0.494"
-                    app:layout_constraintStart_toEndOf="@+id/recycler" />
-
-
-                <com.github.ybq.android.spinkit.SpinKitView
-                    android:id="@+id/progress"
-                    style="@style/SpinKitView.FadingCircle"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:backgroundTint="@color/translucent"
-                    android:elevation="1dp"
-                    android:visibility="invisible"
-                    app:SpinKit_Color="@color/naranaja"
-                    app:layout_constraintBottom_toTopOf="@+id/addVenta"
-                    app:layout_constraintEnd_toEndOf="@+id/recycler"
-                    app:layout_constraintHorizontal_bias="0.478"
-                    app:layout_constraintStart_toStartOf="@+id/recycler"
-                    app:layout_constraintTop_toTopOf="@+id/recycler" />
-            </android.support.constraint.ConstraintLayout>
-
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_gravity="center_horizontal|top"
-                android:background="@drawable/circular_tick"
-                android:padding="1dp"
-                android:src="@mipmap/ic_guardiano" />
-
-        </FrameLayout>
-    </LinearLayout>-->
-</android.support.design.widget.CoordinatorLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_stock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/celeste"
+        android:clickable="true"
+        android:src="@drawable/ic_add_stock"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_add"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.166"
+        app:layout_constraintStart_toEndOf="@+id/fab_add"
+        app:layout_constraintTop_toTopOf="@+id/fab_add"
+        app:layout_constraintVertical_bias="0.0" />
+</androidx.constraintlayout.widget.ConstraintLayout>
 
 

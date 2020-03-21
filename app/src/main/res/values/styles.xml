@@ -13,15 +13,30 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/blanco</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:background">@drawable/rounded_btn</item>
+        <item name="android:background">@drawable/custom_btn</item>
     </style>
 
     <style name="mySpinner" parent="Widget.AppCompat.Light.DropDownItem.Spinner">
         <item name="android:textColor">@color/naranaja</item>
     </style>
+
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
+    <style name="tallaBtn" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/circle_btn</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:layout_width">@dimen/sizeBtnTalla</item>
+        <item name="android:layout_height">@dimen/sizeBtnTalla</item>
+    </style>
+
+    <style name="txtViewGral" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="fontFamily">monospace</item>
+    </style>
+
 </resources>

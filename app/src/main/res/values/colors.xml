@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#008577</color>
+    <color name="colorBlack">#C4070707</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="colorBtnSelected">#CBFF3BEB</color>
     <color name="naranaja">#F8970A</color>
     <color name="celesteClaro">#AAE4F8</color>
     <color name="celeste">#84C8FC</color>
