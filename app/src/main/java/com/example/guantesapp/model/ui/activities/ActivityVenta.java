@@ -1,33 +1,47 @@
 package com.example.guantesapp.model.ui.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.DataQueryBuilder;
+import com.example.guantesapp.model.entities.Modelo;
+import com.example.guantesapp.model.entities.ModeloxTalla;
 import com.example.guantesapp.model.utils.AdapterVenta;
 import com.example.guantesapp.R;
+import com.example.guantesapp.model.utils.GridAdapterForStock;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.style.FadingCircle;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.example.guantesapp.model.ui.activities.MainActivity.listaGuantes;
 
 public class ActivityVenta extends AppCompatActivity {
 
     Spinner spModelo, spTalla, spCantidad;
-    RecyclerView recycler;
-    RecyclerView.LayoutManager layoutManager;
-    RecyclerView.Adapter adapter;
+    GridView gridView;
     ProgressBar progressBar;
     Button addVenta;
     ArrayAdapter<CharSequence> adapter_tallas;
     ArrayAdapter<CharSequence> adapter_cantidad;
+    String modeloSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +50,7 @@ public class ActivityVenta extends AppCompatActivity {
         spModelo = findViewById(R.id.spModelo);
         spTalla = findViewById(R.id.spTalla);
         spCantidad = findViewById(R.id.spCantidad);
-        recycler = findViewById(R.id.recycler);
-        layoutManager = new LinearLayoutManager(ActivityVenta.this);
-        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
+        gridView = findViewById(R.id.gridView);
         progressBar = findViewById(R.id.progress);
         FadingCircle fadingCircle = new FadingCircle();
         progressBar.setProgressDrawable(fadingCircle);
@@ -75,58 +87,44 @@ public class ActivityVenta extends AppCompatActivity {
         addVenta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (adapter != null) {
-                    try {
-                        if (!((AdapterVenta) adapter).getModeloChecked().isEmpty()){
-                           /* String modeloChecked = ((AdapterVenta) adapter).getModeloChecked().get(0);
-                            String talla = (String) spTalla.getSelectedItem();
-                            final String cantidad = (String) spCantidad.getSelectedItem();
-                            if (!talla.isEmpty() && !cantidad.isEmpty() && !modeloChecked.isEmpty()) {
-                                final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("modelo='" + modeloChecked + "'")
-                                        .append(" and tallita='" + talla + "'");
-                                dataQueryBuilder.setWhereClause(sb.toString());
-                                Backendless.Data.of(Talla.class).find(dataQueryBuilder, new AsyncCallback<List<Talla>>() {
+                final String tallaSelected = (String) spTalla.getSelectedItem();
+                final String cantidad = (String) spCantidad.getSelectedItem();
+                if (!tallaSelected.isEmpty() && !cantidad.isEmpty() && !modeloSelected.isEmpty()) {
+                    DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append("modelo_link.modelo='" + modeloSelected + "'")
+                            .append(" and talla='" + tallaSelected + "'")
+                            .append(" and cantidad>0");
+                    dataQueryBuilder.setWhereClause(sb.toString());
+                    Backendless.Data.of(ModeloxTalla.class).find(dataQueryBuilder, new AsyncCallback<List<ModeloxTalla>>() {
+                        @Override
+                        public void handleResponse(List<ModeloxTalla> response) {
+                            if (response.size() > 0) {
+                                Map<String, Object> changes = new HashMap<>();
+                                changes.put("cantidad", response.get(0).getCantidad() - Integer.parseInt(cantidad));
+                                Backendless.Data.of(ModeloxTalla.class).update(sb.toString(), changes, new AsyncCallback<Integer>() {
                                     @Override
-                                    public void handleResponse(List<Talla> response) {
-                                        if (!response.isEmpty()) {
-                                            HashMap<String, Object> changes = new HashMap<>();
-                                            int newCantidad = response.get(0).getCantidad() - Integer.parseInt(cantidad);
-                                            changes.put("cantidad", newCantidad);
-                                            Backendless.Data.of(Talla.class).update(dataQueryBuilder.getWhereClause(), changes, new AsyncCallback<Integer>() {
-                                                @Override
-                                                public void handleResponse(Integer response) {
-                                                    Utils.showToast(getApplicationContext(), "Se registró la venta exitosamente!!");
-                                                }
-
-                                                @Override
-                                                public void handleFault(BackendlessFault fault) {
-                                                    System.out.println("Error actualizando venta " + fault.getMessage());
-                                                }
-                                            });
-                                        }
+                                    public void handleResponse(Integer response) {
+                                        Utils.showToast(getApplicationContext(), "Se registró la venta exitosamente");
                                     }
 
                                     @Override
                                     public void handleFault(BackendlessFault fault) {
-                                        Utils.showToast(getApplicationContext(), "Error buscando talla " + fault.getMessage());
+                                        Utils.showToast(getApplicationContext(), "No se registró la venta exitosamente: " + fault.getMessage());
                                     }
                                 });
                             } else {
-                                Utils.showToast(getApplicationContext(), "Selecciona modelo, talla y cantidad..");
-                            }*/
-                        }else{
-                            Utils.showToast(getApplicationContext(), "No hay modelos seleccionados");
+                                Utils.showToast(getApplicationContext(), "No se encontraron coincidencias , no se registró nada!!");
+                            }
                         }
-                    }catch (Exception e){
-                        System.out.println("Exepcion getting ModeloChecked... "+e.getMessage());
-                    }
 
-
-
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Utils.showToast(getApplicationContext(), "Error getting ModeloxTalla: " + fault.getMessage());
+                        }
+                    });
                 } else {
-                    Utils.showToast(getApplicationContext(), "Adapter nulo!!");
+                    Utils.showToast(getApplicationContext(), "Falta llenar datos!!");
                 }
             }
         });
@@ -135,43 +133,28 @@ public class ActivityVenta extends AppCompatActivity {
 
 
     private void showModelos(final String modelo) {
-        /*progressBar.setVisibility(View.VISIBLE);
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("nombre like '" + modelo + "%'")
-                .append(" and talla.cantidad>0");
-        queryBuilder.setWhereClause(stringBuilder.toString());
-        Backendless.Data.of(ModeloChild.class).find(queryBuilder, new AsyncCallback<List<ModeloChild>>() {
+        queryBuilder.setWhereClause("modelo like '" + modelo + "%'");
+        Backendless.Data.of(Modelo.class).find(queryBuilder, new AsyncCallback<List<Modelo>>() {
             @Override
-            public void handleResponse(List<ModeloChild> response) {
+            public void handleResponse(List<Modelo> response) {
                 if (!response.isEmpty()) {
-                    List<String> listFoto = new ArrayList<>();
-                    List<String> listModelo = new ArrayList<>();
-
-                    for (ModeloChild modeloChild : response) {
-                        listFoto.add(modeloChild.getImagenUrl());
-                        listModelo.add(modeloChild.getNombre());
-                    }
-                    adapter = new AdapterVenta(getApplicationContext(), listFoto, listModelo);
-                    recycler.setLayoutManager(layoutManager);
-                    recycler.setHasFixedSize(true);
-                    recycler.setAdapter(adapter);
-                    ((AdapterVenta) adapter).setOnItemClickListener(new AdapterVenta.OnItemClickListener() {
+                    GridAdapterForStock gridAdapter = new GridAdapterForStock(getApplicationContext(), response);
+                    gridView.setAdapter(gridAdapter);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
-                        public void onItemClick(int position) {
-
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            modeloSelected = parent.getItemAtPosition(position).toString();
                         }
                     });
                 }
-                progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                Utils.showToast(getApplicationContext(), "Algo salió mal buscando modelo " + modelo + " : " + fault.getMessage());
                 progressBar.setVisibility(View.GONE);
             }
-        });*/
-
+        });
     }
 }

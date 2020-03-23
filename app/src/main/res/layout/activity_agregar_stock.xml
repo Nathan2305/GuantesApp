@@ -131,6 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:columnWidth="200dp"
+            android:listSelector="@drawable/states_gridview"
             android:layout_weight="1"
             android:gravity="center"
             android:numColumns="2"

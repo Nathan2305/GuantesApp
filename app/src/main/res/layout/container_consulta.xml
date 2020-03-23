@@ -20,6 +20,7 @@
 
 
         <LinearLayout
+            android:padding="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -29,14 +30,6 @@
                 android:id="@+id/fotoFound"
                 android:layout_width="130dp"
                 android:layout_height="130dp" />
-
-            <ImageView
-                android:id="@+id/check"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="5dp"
-                android:src="@drawable/check_icon"
-                android:visibility="invisible" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

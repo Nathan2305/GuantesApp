@@ -14,13 +14,14 @@ import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.guantesapp.model.entities.ModeloxTalla;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -43,7 +44,7 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
 import com.example.guantesapp.model.entities.Guante;
 import com.example.guantesapp.model.entities.Modelo;
-import com.example.guantesapp.model.utils.GridAdapter;
+import com.example.guantesapp.model.utils.GridAdapterForStock;
 import com.example.guantesapp.R;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.style.FadingCircle;
@@ -57,9 +58,7 @@ import it.sephiroth.android.library.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
     private TextView txtModelo;
-    private Spinner sp_modelo;
-    private Button btn4, btn5, btn6, btn7, btn8, btn9, btn10;
-    private int talla;
+    private Spinner sp_modelo, sp_talla;
     private CheckBox checkModelos;
     private ConstraintLayout layoutParent;
     private FloatingActionButton fab_add, fab_add_stock, fab_add_photo;
@@ -72,24 +71,18 @@ public class MainActivity extends AppCompatActivity {
     private boolean isOpen = false;
     public static final int REQUEST_WRITE_EXTERNAL = 100;
     FloatingActionButton fabShare;
-    boolean allModelos = true;
+    boolean allModelos = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
-        btn4 = findViewById(R.id.btn4);
-        btn5 = findViewById(R.id.btn5);
-        btn6 = findViewById(R.id.btn6);
-        btn7 = findViewById(R.id.btn7);
-        btn8 = findViewById(R.id.btn8);
-        btn9 = findViewById(R.id.btn9);
-        btn10 = findViewById(R.id.btn10);
         txtModelo = findViewById(R.id.txtModelo);
         checkModelos = findViewById(R.id.checkModelos);
         layoutParent = findViewById(R.id.parentConstraint);
         sp_modelo = findViewById(R.id.sp_modelo);
+        sp_talla = findViewById(R.id.sp_talla);
         progress = findViewById(R.id.progressBar);
         FadingCircle fadingCircle = new FadingCircle();
         progress.setProgressDrawable(fadingCircle);
@@ -109,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         progress.setVisibility(View.VISIBLE);
         adapter_tallas = ArrayAdapter.createFromResource(this, R.array.tallas_guantes, android.R.layout.simple_spinner_item);
         adapter_tallas.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        //sp_talla.setAdapter(adapter_tallas);
+        sp_talla.setAdapter(adapter_tallas);
         checkModelos.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -118,13 +111,13 @@ public class MainActivity extends AppCompatActivity {
                     sp_modelo.setClickable(false);
                     sp_modelo.setVisibility(View.INVISIBLE);
                     txtModelo.setVisibility(View.INVISIBLE);
-                    allModelos = false;
+                    allModelos = true;
                 } else {
                     sp_modelo.setEnabled(true);
                     sp_modelo.setClickable(true);
                     sp_modelo.setVisibility(View.VISIBLE);
                     txtModelo.setVisibility(View.VISIBLE);
-                    allModelos = true;
+                    allModelos = false;
                 }
             }
         });
@@ -177,52 +170,49 @@ public class MainActivity extends AppCompatActivity {
                 progress.setVisibility(View.VISIBLE);
                 disableViews(true);
                 final String modelo = (String) sp_modelo.getSelectedItem();
+                final String talla = (String) sp_talla.getSelectedItem();
                 final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
                 dataQueryBuilder.setPageSize(50);
                 StringBuilder sb = new StringBuilder();
-                if (!allModelos) {
-                    if (talla != 0) {
-                        sb.append("talla='" + talla + "'")
-                                .append(" and cantidad>=0");
+                if (allModelos) { //Corregir para la nueva talla
+                    if (talla != null & !talla.isEmpty()) {
+                        sb.append("ModeloxTalla[modelo_link].talla='" + talla + "'")
+                                .append(" and ModeloxTalla[modelo_link].cantidad>0");
+                    } else { //buscar por modelo y talla
+                        sb.append("ModeloxTalla[modelo_link].cantidad>0");
                     }
-                } else {
-                    if (talla != 0) {
-                        sb.append("modelo like '" + modelo + "%'")
-                                .append(" and talla='" + talla + "'")
-                                .append(" and cantidad>=0");
-                    } else {
-                        sb.append(" modelo like '" + modelo + "%'")
-                                .append(" and cantidad>=0");
+                } else {// búsqueda por modelo
+                    if (talla != null) { // por talla
+                        sb.append("modelo like'" + modelo + "%'")
+                                .append(" and ModeloxTalla[modelo_link].talla='" + talla + "'")
+                                .append(" and ModeloxTalla[modelo_link].cantidad>0");
+                    } else { //todos los modelos del modelo seleccionado
+                        sb.append("modelo like'" + modelo + "%'")
+                                .append(" and ModeloxTalla[modelo_link].cantidad>0");
                     }
                 }
                 dataQueryBuilder.setWhereClause(sb.toString());
                 Backendless.Data.of(Modelo.class).find(dataQueryBuilder, new AsyncCallback<List<Modelo>>() {
                     @Override
                     public void handleResponse(List<Modelo> response) {
-                        try {
-                            if (response.size() > 0) {
-                                GridAdapter adapter = new GridAdapter(MainActivity.this, response);
-                                gridView.setAdapter(adapter);
-                                disableViews(false);
-                                progress.setVisibility(View.GONE);
-                            } else {
-                                Utils.showToast(getApplicationContext(), "No hay modelos " + modelo + " disponibles");
-                                disableViews(false);
-                                progress.setVisibility(View.GONE);
-                                gridView.setAdapter(null);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Excepcion..... " + e.getMessage());
+                        if (response.size() > 0) {
+                            GridAdapterForStock adapterForStock = new GridAdapterForStock(getApplicationContext(), response);
+                            gridView.setAdapter(adapterForStock);
+                        } else {
+                            Utils.showToast(getApplicationContext(), "No hay modelos " + modelo + " disponibles en talla " + talla);
+                            gridView.setAdapter(null);
                         }
+                        disableViews(false);
+                        progress.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
                     public void handleFault(BackendlessFault fault) {
+                        Utils.showToast(getApplicationContext(), "Error consultando modelos :" + fault.getMessage());
                         disableViews(false);
-                        progress.setVisibility(View.GONE);
+                        progress.setVisibility(View.INVISIBLE);
                     }
                 });
-
             }
         });
     }
@@ -298,20 +288,21 @@ public class MainActivity extends AppCompatActivity {
                         ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
                         adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         sp_modelo.setAdapter(adapter_modelos);
-                        progress.setVisibility(View.GONE);
+                        progress.setVisibility(View.INVISIBLE);
                     } catch (Exception e) {
                         System.out.println("Exception Guava... " + e.getMessage());
-                        progress.setVisibility(View.GONE);
+                        progress.setVisibility(View.INVISIBLE);
                     }
                 } else {
                     Toast.makeText(getApplicationContext(), "No se han agredado listaGuantes aún", Toast.LENGTH_SHORT).show();
-                    progress.setVisibility(View.GONE);
+                    progress.setVisibility(View.INVISIBLE);
                 }
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                Toast.makeText(getApplicationContext(), "Algo salió mal.." + fault.getMessage(), Toast.LENGTH_SHORT).show();
+                // Toast.makeText(getApplicationContext(), "Algo salió mal.." + fault.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("Error getting modelos ", fault.getMessage());
             }
         });
     }
@@ -421,79 +412,5 @@ public class MainActivity extends AppCompatActivity {
         return val;
     }
 
-
-    public void clickBtnTalla(View view) {
-        switch (view.getId()) {
-            case R.id.btn4:
-                talla = 4;
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                break;
-            case R.id.btn5:
-                talla = 5;
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                break;
-            case R.id.btn6:
-                talla = 6;
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                break;
-            case R.id.btn7:
-                talla = 7;
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                break;
-            case R.id.btn8:
-                talla = 8;
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                break;
-            case R.id.btn9:
-                talla = 9;
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                break;
-            case R.id.btn10:
-                talla = 10;
-                btn10.setBackground(getResources().getDrawable(R.drawable.circle_btn_selected));
-                btn4.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn6.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn5.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn8.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn9.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-                btn7.setBackground(getResources().getDrawable(R.drawable.circle_btn));
-        }
-    }
 
 }

@@ -16,13 +16,16 @@ import java.util.List;
 import it.sephiroth.android.library.picasso.Picasso;
 
 
-public class GridAdapter extends BaseAdapter {
+public class GridAdapterForStock extends BaseAdapter {
     Context context;
     List<Modelo> listaModelos;
+    List<String> modeloUrl;
+    String fromWhere;
 
-    public GridAdapter(Context context, List<Modelo> listaModelos) {
+    public GridAdapterForStock(Context context, List<Modelo> listaModelos/*, List<String> modeloUrl*/) {
         this.context = context;
         this.listaModelos = listaModelos;
+        //this.modeloUrl = modeloUrl;
     }
 
     @Override
@@ -53,6 +56,11 @@ public class GridAdapter extends BaseAdapter {
         } else {
             viewHoldernew = (ViewHolderGridview) convertView.getTag();
         }
+        /*if (modeloUrl == null && listaModelos != null) {
+            Picasso.with(context).load(listaModelos.get(position).getFoto_url()).into(viewHoldernew.fotoFound);
+        } else {
+            Picasso.with(context).load(modeloUrl.get(position)).into(viewHoldernew.fotoFound);
+        }*/
         Picasso.with(context).load(listaModelos.get(position).getFoto_url()).into(viewHoldernew.fotoFound);
         return convertView;
     }

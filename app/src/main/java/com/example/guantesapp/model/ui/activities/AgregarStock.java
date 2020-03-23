@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Environment;
 
 import androidx.annotation.NonNull;
-
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
@@ -29,13 +27,11 @@ import com.backendless.persistence.DataQueryBuilder;
 import com.example.guantesapp.R;
 import com.example.guantesapp.model.entities.Modelo;
 import com.example.guantesapp.model.entities.ModeloxTalla;
-import com.example.guantesapp.model.utils.GridAdapter;
+import com.example.guantesapp.model.utils.GridAdapterForStock;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.style.FadingCircle;
-import com.squareup.okhttp.internal.Util;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,6 +109,7 @@ public class AgregarStock extends AppCompatActivity {
     }
 
     public void existeTallaModelo(final String modelo, final String talla, final String cantidad) {
+        disableViews(true);
         final StringBuilder sb = new StringBuilder();
         sb.append("modelo_link.modelo='").append(modelo).append("'")
                 .append(" and talla='").append(talla).append("'");
@@ -132,15 +129,15 @@ public class AgregarStock extends AppCompatActivity {
                         @Override
                         public void handleResponse(Integer response) {
                             Utils.showToast(getApplicationContext(), "Se actualizó la tabla");
+                            disableViews(false);
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
                             Utils.showToast(getApplicationContext(), "No se actualizó la tabla: " + fault.getMessage());
+                            disableViews(false);
                         }
                     });
-
-
                 } else {
                     ///No existe modelo para esa talla, crear relación
                     ModeloxTalla modeloxTalla = new ModeloxTalla();
@@ -152,22 +149,24 @@ public class AgregarStock extends AppCompatActivity {
                             HashMap<String, Object> parentObject = new HashMap<String, Object>();
                             parentObject.put("objectId", response.getObjectId());
 
-                            StringBuilder sbuilder = new StringBuilder();
+                           /* StringBuilder sbuilder = new StringBuilder();
                             sbuilder.append("modelo_link.modelo='").append(modelo).append("'")
                                     .append(" and talla='").append(talla).append("'");
                             DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
-                            dataQueryBuilder.setWhereClause(sb.toString());
+                            dataQueryBuilder.setWhereClause(sb.toString());*/
 
                             Backendless.Data.of("ModeloxTalla").addRelation(parentObject,
                                     "modelo_link", "modelo='" + modelo + "'", new AsyncCallback<Integer>() {
                                         @Override
                                         public void handleResponse(Integer response) {
                                             Utils.showToast(getApplicationContext(), "Se creó la relacion");
+                                            disableViews(false);
                                         }
 
                                         @Override
                                         public void handleFault(BackendlessFault fault) {
-                                            Utils.showToast(getApplicationContext(), "No se creó la relacion");
+                                            Utils.showToast(getApplicationContext(), "No se creó la relacion :" + fault.getMessage());
+                                            disableViews(false);
                                         }
                                     });
                         }
@@ -175,6 +174,7 @@ public class AgregarStock extends AppCompatActivity {
                         @Override
                         public void handleFault(BackendlessFault fault) {
                             Utils.showToast(getApplicationContext(), "No se guardó el objeto: " + fault.getMessage());
+                            disableViews(false);
                         }
                     });
                 }
@@ -183,6 +183,7 @@ public class AgregarStock extends AppCompatActivity {
             @Override
             public void handleFault(BackendlessFault fault) {
                 Utils.showToast(getApplicationContext(), "Error buscando stock: " + fault.getMessage());
+                disableViews(false);
             }
         });
     }
@@ -194,7 +195,7 @@ public class AgregarStock extends AppCompatActivity {
             @Override
             public void handleResponse(List<Modelo> response) {
                 if (!response.isEmpty()) {
-                    final GridAdapter gridAdapter = new GridAdapter(getApplicationContext(), response);
+                    final GridAdapterForStock gridAdapter = new GridAdapterForStock(getApplicationContext(), response);
                     gridViewModelos.setAdapter(gridAdapter);
                     progressBar.setVisibility(View.GONE);
                     gridViewModelos.setOnItemClickListener(new AdapterView.OnItemClickListener() {

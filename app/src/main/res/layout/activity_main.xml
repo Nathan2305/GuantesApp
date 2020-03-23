@@ -13,11 +13,10 @@
         style="@style/SpinKitView.FadingCircle"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginStart="8dp"
         android:backgroundTint="@color/translucent"
         android:elevation="1dp"
         android:visibility="invisible"
-        app:SpinKit_Color="@color/naranaja"
+        app:SpinKit_Color="@color/colorPrimaryDark"
         app:layout_constraintBottom_toTopOf="@+id/fab_add"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
         app:layout_constraintHorizontal_bias="0.5"
@@ -43,117 +42,97 @@
             app:cardUseCompatPadding="true">
 
             <LinearLayout
+                android:layout_margin="0dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="2dp">
+                android:padding="5dp">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
-                    android:layout_margin="5dp"
-                    android:layout_height="wrap_content"
-                    android:padding="4dp">
-
-                    <Button
-                        android:onClick="clickBtnTalla"
-                        android:id="@+id/btn7"
-                        style="@style/tallaBtn"
-                        android:text="7"
-                        app:layout_constraintBottom_toBottomOf="@+id/linearLayout4"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/linearLayout4" />
-
-                    <LinearLayout
-                        android:id="@+id/linearLayout4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0.5"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="7dp"
-                            android:orientation="horizontal">
-
-                            <Button
-                                android:onClick="clickBtnTalla"
-                                android:id="@+id/btn4"
-                                style="@style/tallaBtn"
-                                android:layout_marginTop="30dp"
-                                android:text="4" />
-
-                            <Button
-                                android:onClick="clickBtnTalla"
-                                android:id="@+id/btn5"
-                                style="@style/tallaBtn"
-                                android:text="5" />
-
-                            <Button
-                                android:onClick="clickBtnTalla"
-                                android:id="@+id/btn6"
-                                style="@style/tallaBtn"
-                                android:layout_marginTop="30dp"
-                                android:text="6" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <Button
-                                android:onClick="clickBtnTalla"
-                                android:id="@+id/btn8"
-                                style="@style/tallaBtn"
-                                android:text="8" />
-
-                            <Button
-                                android:onClick="clickBtnTalla"
-                                android:id="@+id/btn9"
-                                style="@style/tallaBtn"
-                                android:layout_marginTop="30dp"
-                                android:text="9" />
-
-                            <Button
-                                android:onClick="clickBtnTalla"
-                                android:id="@+id/btn10"
-                                style="@style/tallaBtn"
-                                android:text="10" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageView
+                    android:layout_weight="0"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_search"
+                    tools:ignore="ContentDescription" />
 
                 <LinearLayout
-                    android:layout_gravity="center"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:padding="5dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="5dp">
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/txtModelo"
-                        android:textStyle="bold"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/txtViewGral"
-                        android:text="Modelo"/>
+                        android:orientation="horizontal"
+                        android:padding="2dp">
 
-                    <Spinner
-                        android:id="@+id/sp_modelo"
-                        style="@style/mySpinner"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:textAlignment="textStart" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical"
+                                android:padding="5dp">
+
+                                <TextView
+                                    android:id="@+id/txtModelo"
+                                    style="@style/txtViewGral"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Modelo"
+                                    android:textStyle="bold" />
+
+                                <Spinner
+                                    android:id="@+id/sp_modelo"
+                                    style="@style/mySpinner"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:padding="5dp"
+                                    android:textAlignment="textStart" />
+
+                            </LinearLayout>
+                            <RelativeLayout
+                                android:gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:orientation="vertical"
+                                    android:padding="5dp">
+
+                                    <TextView
+                                        style="@style/txtViewGral"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Talla"
+                                        android:textStyle="bold" />
+
+                                    <Spinner
+                                        android:id="@+id/sp_talla"
+                                        style="@style/mySpinner"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:padding="5dp"
+                                        android:textAlignment="textStart" />
+
+                                </LinearLayout>
+                            </RelativeLayout>
+
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
 
 
                     <CheckBox
@@ -167,11 +146,10 @@
                         android:id="@+id/consultar"
                         style="@style/myButton"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:fontFamily="monospace"
                         android:text="Consultar" />
                 </LinearLayout>
-
 
             </LinearLayout>
 
