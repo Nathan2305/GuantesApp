@@ -5,7 +5,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity
-public class ModeloUrlRoomDB {
+public class MRoomUrlDB {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name="id" )
     private int id;

@@ -12,9 +12,11 @@ import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.example.guantesapp.model.entities.ModeloxTalla;
+import com.example.guantesapp.model.utils.GridAdapterConsulta;
+import com.example.guantesapp.model.utils.GuantesDataBase;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.app.ActivityCompat;
@@ -28,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -44,10 +47,8 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
 import com.example.guantesapp.model.entities.Guante;
 import com.example.guantesapp.model.entities.Modelo;
-import com.example.guantesapp.model.utils.GridAdapterForStock;
 import com.example.guantesapp.R;
 import com.example.guantesapp.model.utils.Utils;
-import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,15 +64,19 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout layoutParent;
     private FloatingActionButton fab_add, fab_add_stock, fab_add_photo;
     public static List<String> listaGuantes;
+    public List<Modelo> listModelos;
     private Button consultar;
     private GridView gridView;
     private ArrayAdapter<CharSequence> adapter_tallas;
-    private Animation fabOpen, fabClose, rotateForward, rotateBackward;
-    private ProgressBar progress;
+    private List<String> listNameShare;
+    private Animation fabOpen, fabClose, rotateForward, rotateBackward, progressIcon;
+    private ProgressBar progressBar;
     private boolean isOpen = false;
     public static final int REQUEST_WRITE_EXTERNAL = 100;
     FloatingActionButton fabShare;
     boolean allModelos = false;
+    GridAdapterConsulta adapterConsulta = null;
+    int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +88,7 @@ public class MainActivity extends AppCompatActivity {
         layoutParent = findViewById(R.id.parentConstraint);
         sp_modelo = findViewById(R.id.sp_modelo);
         sp_talla = findViewById(R.id.sp_talla);
-        progress = findViewById(R.id.progressBar);
-        FadingCircle fadingCircle = new FadingCircle();
-        progress.setProgressDrawable(fadingCircle);
+        progressBar = findViewById(R.id.progressBar);
         fab_add = findViewById(R.id.fab_add);
         fab_add_stock = findViewById(R.id.fab_add_stock);
         fab_add_photo = findViewById(R.id.fab_add_photo);
@@ -97,9 +100,6 @@ public class MainActivity extends AppCompatActivity {
         rotateForward = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
         rotateBackward = AnimationUtils.loadAnimation(this, R.anim.rotate_backward);
 
-        // getAllModelos();
-
-        progress.setVisibility(View.VISIBLE);
         adapter_tallas = ArrayAdapter.createFromResource(this, R.array.tallas_guantes, android.R.layout.simple_spinner_item);
         adapter_tallas.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_talla.setAdapter(adapter_tallas);
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
             fabShare.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.verdeBonito)));
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            progress.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.translucent)));
+            //progress.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.translucent)));
         }
         fab_add_stock.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,11 +167,12 @@ public class MainActivity extends AppCompatActivity {
         consultar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progress.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
                 disableViews(true);
                 final String modelo = (String) sp_modelo.getSelectedItem();
                 final String talla = (String) sp_talla.getSelectedItem();
-                final DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+                DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+                dataQueryBuilder.addSortBy("created ASC");
                 dataQueryBuilder.setPageSize(50);
                 StringBuilder sb = new StringBuilder();
                 if (allModelos) { //Corregir para la nueva talla
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                         sb.append("ModeloxTalla[modelo_link].cantidad>0");
                     }
                 } else {// búsqueda por modelo
-                    if (talla != null) { // por talla
+                    if (talla != null & !talla.isEmpty()) { // por talla
                         sb.append("modelo like'" + modelo + "%'")
                                 .append(" and ModeloxTalla[modelo_link].talla='" + talla + "'")
                                 .append(" and ModeloxTalla[modelo_link].cantidad>0");
@@ -194,30 +195,88 @@ public class MainActivity extends AppCompatActivity {
                 dataQueryBuilder.setWhereClause(sb.toString());
                 Backendless.Data.of(Modelo.class).find(dataQueryBuilder, new AsyncCallback<List<Modelo>>() {
                     @Override
-                    public void handleResponse(List<Modelo> response) {
-                        if (response.size() > 0) {
-                            GridAdapterForStock adapterForStock = new GridAdapterForStock(getApplicationContext(), response);
-                            gridView.setAdapter(adapterForStock);
+                    public void handleResponse(final List<Modelo> responseModel) {
+                        if (responseModel.size() > 0) {
+                            listModelos = responseModel;
+                            listNameShare = new ArrayList<>();
+                            adapterConsulta = new GridAdapterConsulta(MainActivity.this, listModelos);
+                            gridView.setAdapter(adapterConsulta);
                         } else {
                             Utils.showToast(getApplicationContext(), "No hay modelos " + modelo + " disponibles en talla " + talla);
                             gridView.setAdapter(null);
                         }
                         disableViews(false);
-                        progress.setVisibility(View.INVISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
 
                     @Override
                     public void handleFault(BackendlessFault fault) {
                         Utils.showToast(getApplicationContext(), "Error consultando modelos :" + fault.getMessage());
                         disableViews(false);
-                        progress.setVisibility(View.INVISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
             }
         });
+
+        gridView.setChoiceMode(GridView.CHOICE_MODE_MULTIPLE_MODAL);
+        gridView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(android.view.ActionMode mode, int position, long id, boolean checked) {
+                count++;
+                if (count > 1) {
+                    mode.setTitle(count + " Guantes");
+                } else {
+                    mode.setTitle(count + " Guante");
+                }
+                Modelo modelo = listModelos.get(position);
+                if (modelo.isChecked()) {
+                    modelo.setChecked(false);
+                } else {
+                    modelo.setChecked(true);
+                }
+                listModelos.get(position).setChecked(modelo.isChecked());
+                adapterConsulta.updateRecords(listModelos);
+                listNameShare.add((String) adapterConsulta.getItem(position));
+            }
+
+            @Override
+            public boolean onCreateActionMode(android.view.ActionMode mode, Menu menu) {
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.menu_other_options, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(android.view.ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(android.view.ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(android.view.ActionMode mode) {
+                count = 0;
+                for (Modelo eachModelo : listModelos) {
+                    if (eachModelo.isChecked()) {
+                        eachModelo.setChecked(false);
+                    }
+                }
+                adapterConsulta.updateRecords(listModelos);
+            }
+        });
+
+
     }
 
-    /*private void SaveBitmap() {
+
+
+
+
+   /* private void SaveBitmap() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionWrite();
         } else {
@@ -257,11 +316,47 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Utils.showToast(this, "Selecciona al menos una imagen para compartir");
             }
-
-
         }
-    }
-*/
+    }*/
+
+
+
+
+   /* private ActionMode.Callback mActionModelCallBack = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_other_options, menu);
+            mode.setTitle("Choose Other Options");
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.search:
+                    Utils.showToast(getApplicationContext(), "SELECTED SEARCH");
+                    mode.finish();
+                    return true;
+                case R.id.add:
+                    Utils.showToast(getApplicationContext(), "SELECTED ADD");
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+        }
+    };*/
+
     private void requestPermissionWrite() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL);
     }
@@ -276,7 +371,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getAllModelos() {
-        Backendless.Data.of(Guante.class).find(new AsyncCallback<List<Guante>>() {
+        DataQueryBuilder db = DataQueryBuilder.create();
+        db.setPageSize(15);
+        Backendless.Data.of(Guante.class).find(db, new AsyncCallback<List<Guante>>() {
             @Override
             public void handleResponse(List<Guante> response) {
                 if (!response.isEmpty()) {
@@ -284,18 +381,11 @@ public class MainActivity extends AppCompatActivity {
                     for (Guante guante : response) {
                         listaGuantes.add(guante.getName());
                     }
-                    try {
-                        ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
-                        adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        sp_modelo.setAdapter(adapter_modelos);
-                        progress.setVisibility(View.INVISIBLE);
-                    } catch (Exception e) {
-                        System.out.println("Exception Guava... " + e.getMessage());
-                        progress.setVisibility(View.INVISIBLE);
-                    }
+                    ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
+                    adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    sp_modelo.setAdapter(adapter_modelos);
                 } else {
                     Toast.makeText(getApplicationContext(), "No se han agredado listaGuantes aún", Toast.LENGTH_SHORT).show();
-                    progress.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -411,6 +501,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return val;
     }
-
 
 }

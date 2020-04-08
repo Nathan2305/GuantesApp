@@ -5,6 +5,7 @@ public class ModeloxTalla {
     private int cantidad;
     private String talla;
 
+
     public int getCantidad() {
         return cantidad;
     }
@@ -28,4 +29,5 @@ public class ModeloxTalla {
     public void setObjectId(String objectId) {
         this.objectId = objectId;
     }
+
 }

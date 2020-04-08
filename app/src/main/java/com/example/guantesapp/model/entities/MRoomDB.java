@@ -7,7 +7,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity
-public class ModeloRoomDB {
+public class MRoomDB {
 
     @PrimaryKey
     @ColumnInfo(name = "id")

@@ -35,17 +35,16 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
 import com.example.guantesapp.model.entities.Guante;
+import com.example.guantesapp.model.entities.MRoomDB;
+import com.example.guantesapp.model.entities.MRoomUrlDB;
 import com.example.guantesapp.model.entities.Modelo;
 import com.example.guantesapp.R;
-import com.example.guantesapp.model.entities.ModeloRoomDB;
-import com.example.guantesapp.model.entities.ModeloUrlRoomDB;
 import com.example.guantesapp.model.utils.GuantesDataBase;
 import com.example.guantesapp.model.utils.Utils;
-import com.github.ybq.android.spinkit.sprite.Sprite;
-import com.github.ybq.android.spinkit.style.FadingCircle;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import static com.example.guantesapp.model.ui.activities.AgregarStock.REQUEST_IMAGE_GALLERY;
 import static com.example.guantesapp.model.ui.activities.MainActivity.listaGuantes;
@@ -64,6 +63,7 @@ public class AgregarModelo extends AppCompatActivity {
     Bitmap selectedImage;
     ProgressBar progress;
     public static final String pathRemote = "ModelosGuantes";
+    ArrayAdapter<String> adapter_modelos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +73,9 @@ public class AgregarModelo extends AppCompatActivity {
         textViewNuevo = findViewById(R.id.textViewNuevo);
         nuevoModelo = findViewById(R.id.nuevoModelo);
         progress = findViewById(R.id.progress);
-        Sprite doubleBounce = new FadingCircle();
-        progress.setProgressDrawable(doubleBounce);
         spinnerModelo = findViewById(R.id.name_foto);
         if (listaGuantes != null) {
-            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
+            adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerModelo.setAdapter(adapter_modelos);
         }
@@ -158,11 +156,11 @@ public class AgregarModelo extends AppCompatActivity {
         final Guante guante = new Guante(nombre);
         if (newModel) { //Se debe guardar en tablas Modelo y Guante Modelo-01234
             try {
-                ModeloRoomDB modeloRoomDB = new ModeloRoomDB();
-                modeloRoomDB.setId(nombre);
-                modeloRoomDB.setOrden(0);
-                saveModelIntoSQLite(modeloRoomDB);
-                final String nom_modeloFull = guante.getName() + "-" + modeloRoomDB.getOrden();
+                MRoomDB mRoomDB = new MRoomDB();
+                mRoomDB.setId(nombre);
+                mRoomDB.setOrden(0);
+                saveModelIntoSQLite(mRoomDB);
+                final String nom_modeloFull = guante.getName() + "-" + mRoomDB.getOrden();
                 final Modelo modelo = new Modelo(nom_modeloFull);
                 modelo.setFoto_url(imageUrl);
 
@@ -195,21 +193,34 @@ public class AgregarModelo extends AppCompatActivity {
             @Override
             public void handleResponse(Guante response) {
                 Utils.showToast(AgregarModelo.this, "Se guardó el Guante " + response.getName() + " correctamente");
-                ModeloUrlRoomDB modeloUrlRoomDB = new ModeloUrlRoomDB();
-                modeloUrlRoomDB.setModelo(modeloFullIntoroom);
-                modeloUrlRoomDB.setFoto_url(fotoUrlIntoRoom);
-                Utils.insertModeloUrl(getApplicationContext(), modeloUrlRoomDB);
+                if (listaGuantes == null) {
+                    listaGuantes = new ArrayList<>();
+                    adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
+                    adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerModelo.setAdapter(adapter_modelos);
+                } else {
+                    adapter_modelos.setNotifyOnChange(true);
+                    listaGuantes.add(response.getName());
+                }
+                MRoomUrlDB mRoomUrlDB = new MRoomUrlDB();
+                mRoomUrlDB.setModelo(modeloFullIntoroom);
+                mRoomUrlDB.setFoto_url(fotoUrlIntoRoom);
+                insertModeloUrl(mRoomUrlDB);
+                checkNuevo.setChecked(false);
+                newModel=false;
+                spinnerModelo.setEnabled(true);
+                spinnerModelo.setClickable(true);
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-                Utils.showToast(AgregarModelo.this, "No se guardó el Guante " + nombre + " correctamente");
+                Utils.showToast(AgregarModelo.this, "No se guardó el Guante " + nombre + " correctamente - " + fault.getMessage());
             }
         });
     }
 
-    private void saveModelIntoSQLite(ModeloRoomDB modeloRoomDB) {
-        new TaskSaveModelRoom().execute(modeloRoomDB);
+    private void saveModelIntoSQLite(MRoomDB mRoomDB) {
+        new TaskSaveModelRoom().execute(mRoomDB);
     }
 
     private void getModeloFromRoomDBSaveBknd(String[] strings) {
@@ -225,15 +236,15 @@ public class AgregarModelo extends AppCompatActivity {
                 int ordenByModel = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().getOrdenById(name);
                 if (ordenByModel >= 0) {
                     ordenByModel++;
-                    ModeloRoomDB modeloRoomDB = new ModeloRoomDB();
-                    modeloRoomDB.setId(name);
-                    modeloRoomDB.setOrden(ordenByModel);
-                    GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().updateOrden(modeloRoomDB);
+                    MRoomDB mRoomDB = new MRoomDB();
+                    mRoomDB.setId(name);
+                    mRoomDB.setOrden(ordenByModel);
+                    GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().updateOrden(mRoomDB);
 
                     int newordenToSave = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().getOrdenById(name);
 
                     Modelo modelo = new Modelo();
-                    modelo.setModelo(modeloRoomDB.getId() + "-" + newordenToSave);
+                    modelo.setModelo(mRoomDB.getId() + "-" + newordenToSave);
                     modelo.setFoto_url(fotoUrl);
                     Backendless.Data.of(Modelo.class).save(modelo, new AsyncCallback<Modelo>() {
                         @Override
@@ -266,6 +277,28 @@ public class AgregarModelo extends AppCompatActivity {
         }
     }
 
+    public void insertModeloUrl(MRoomUrlDB mRoomUrlDB) {
+        try {
+            new TaskInserIntoSQLModeloUrl().execute(mRoomUrlDB);
+        } catch (Exception e) {
+            System.out.println("Error Method insertModeloUrl - " + e.getMessage());
+        }
+    }
+
+    public class TaskInserIntoSQLModeloUrl extends AsyncTask<MRoomUrlDB, Void, Void> {
+        @Override
+        protected Void doInBackground(MRoomUrlDB... objects) {
+            try {
+                long id = GuantesDataBase.newInstance2(getApplicationContext()).getGuantesInfoDao().insertModeloUrlRoom(objects[0]);
+                if (id > -1) {
+                    System.out.println("Se guardó modelo por completo!!!");
+                }
+            } catch (Exception e) {
+                System.out.println("Error Method TaskInserIntoSQLModeloUrl - " + e.getMessage());
+            }
+            return null;
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -322,18 +355,18 @@ public class AgregarModelo extends AppCompatActivity {
     }
 
 
-    public class TaskSaveModelRoom extends AsyncTask<ModeloRoomDB, Void, Void> {
+    public class TaskSaveModelRoom extends AsyncTask<MRoomDB, Void, Void> {
         @Override
-        protected Void doInBackground(ModeloRoomDB... modeloRoomDBS) {
+        protected Void doInBackground(MRoomDB... mRoomDBS) {
             try {
-                long id = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().insertModeloRoom(modeloRoomDBS[0]);
+                long id = GuantesDataBase.newInstance(getApplicationContext()).getGuantesInfoDao().insertModeloRoom(mRoomDBS[0]);
                 if (id > -1L) {
                     System.out.println("Se guardó el modelo en RoomDB");
                 } else {
                     System.out.println("No se guardó el modelo en RoomDB");
                 }
-            }catch (Exception e){
-                System.out.println("Excepcion - TaskSaveModelRoom method - "+e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Excepcion - TaskSaveModelRoom method - " + e.getMessage());
             }
 
             return null;

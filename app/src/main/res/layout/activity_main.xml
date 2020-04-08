@@ -8,15 +8,15 @@
     tools:context=".model.ui.activities.MainActivity">
 
 
-    <com.github.ybq.android.spinkit.SpinKitView
+    <ProgressBar
         android:id="@+id/progressBar"
-        style="@style/SpinKitView.FadingCircle"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:backgroundTint="@color/translucent"
         android:elevation="1dp"
+        android:indeterminateDrawable="@drawable/progress_icon"
+        android:indeterminateDuration="@android:integer/config_longAnimTime"
         android:visibility="invisible"
-        app:SpinKit_Color="@color/colorPrimaryDark"
         app:layout_constraintBottom_toTopOf="@+id/fab_add"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout3"
         app:layout_constraintHorizontal_bias="0.5"
@@ -42,27 +42,27 @@
             app:cardUseCompatPadding="true">
 
             <LinearLayout
-                android:layout_margin="0dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="0dp"
                 android:orientation="horizontal"
                 android:padding="5dp">
 
                 <ImageView
-                    android:layout_weight="0"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center"
+                    android:layout_weight="0"
                     android:src="@drawable/ic_search"
                     tools:ignore="ContentDescription" />
 
                 <LinearLayout
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:padding="5dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:padding="5dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -99,10 +99,12 @@
                                     android:textAlignment="textStart" />
 
                             </LinearLayout>
+
                             <RelativeLayout
-                                android:gravity="center"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:gravity="center">
+
                                 <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -163,9 +165,7 @@
             android:columnWidth="200dp"
             android:gravity="center"
             android:numColumns="2"
-            android:padding="8dp">
-
-        </GridView>
+            android:padding="8dp"/>
     </LinearLayout>
 
 

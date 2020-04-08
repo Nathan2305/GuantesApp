@@ -127,6 +127,7 @@
         </androidx.cardview.widget.CardView>
 
         <GridView
+            android:layout_margin="5dp"
             android:id="@+id/gridViewFotos"
             android:layout_width="match_parent"
             android:layout_height="0dp"

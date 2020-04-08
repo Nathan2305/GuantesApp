@@ -1,6 +1,7 @@
 package com.example.guantesapp.model.ui.activities;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -24,10 +25,14 @@ import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
+import com.backendless.servercode.annotation.Async;
 import com.example.guantesapp.R;
+import com.example.guantesapp.model.entities.Guante;
+import com.example.guantesapp.model.entities.MRoomTallaCantidad;
 import com.example.guantesapp.model.entities.Modelo;
 import com.example.guantesapp.model.entities.ModeloxTalla;
 import com.example.guantesapp.model.utils.GridAdapterForStock;
+import com.example.guantesapp.model.utils.GuantesDataBase;
 import com.example.guantesapp.model.utils.Utils;
 import com.github.ybq.android.spinkit.style.FadingCircle;
 
@@ -35,6 +40,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.example.guantesapp.model.ui.activities.MainActivity.listaGuantes;
 
@@ -100,6 +106,7 @@ public class AgregarStock extends AppCompatActivity {
                 final String talla = (String) spinnerTalla.getSelectedItem();
                 final String cantidad = (String) spinnerCantidad.getSelectedItem();
                 if (!modeloSelected.isEmpty() && !talla.isEmpty() && !cantidad.isEmpty()) {
+                    progressBar.setVisibility(View.VISIBLE);
                     existeTallaModelo(modeloSelected, talla, cantidad);
                 } else {
                     Utils.showToast(getApplicationContext(), "Falta seleccionar datos");
@@ -121,7 +128,7 @@ public class AgregarStock extends AppCompatActivity {
                 if (response.size() > 0) {
                     //Existe modelo para esa talla,entonces actualizar
                     int cantidad_found = response.get(0).getCantidad();
-                    int newCantidad = cantidad_found + Integer.parseInt(cantidad);
+                    final int newCantidad = cantidad_found + Integer.parseInt(cantidad);
                     Map<String, Object> changes = new HashMap<>();
                     changes.put("talla", talla);
                     changes.put("cantidad", newCantidad);
@@ -129,12 +136,19 @@ public class AgregarStock extends AppCompatActivity {
                         @Override
                         public void handleResponse(Integer response) {
                             Utils.showToast(getApplicationContext(), "Se actualizó la tabla");
+                            MRoomTallaCantidad mRoomTallaCantidad = new MRoomTallaCantidad();
+                            mRoomTallaCantidad.setTalla(talla);
+                            mRoomTallaCantidad.setCantidad(newCantidad);
+                            mRoomTallaCantidad.setModelo(modelo);
+                            updateSQLTallaCantidad(mRoomTallaCantidad);
+                            progressBar.setVisibility(View.GONE);
                             disableViews(false);
                         }
 
                         @Override
                         public void handleFault(BackendlessFault fault) {
                             Utils.showToast(getApplicationContext(), "No se actualizó la tabla: " + fault.getMessage());
+                            progressBar.setVisibility(View.GONE);
                             disableViews(false);
                         }
                     });
@@ -145,27 +159,28 @@ public class AgregarStock extends AppCompatActivity {
                     modeloxTalla.setTalla(talla);
                     Backendless.Data.of(ModeloxTalla.class).save(modeloxTalla, new AsyncCallback<ModeloxTalla>() {
                         @Override
-                        public void handleResponse(ModeloxTalla response) {
-                            HashMap<String, Object> parentObject = new HashMap<String, Object>();
-                            parentObject.put("objectId", response.getObjectId());
-
-                           /* StringBuilder sbuilder = new StringBuilder();
-                            sbuilder.append("modelo_link.modelo='").append(modelo).append("'")
-                                    .append(" and talla='").append(talla).append("'");
-                            DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
-                            dataQueryBuilder.setWhereClause(sb.toString());*/
+                        public void handleResponse(final ModeloxTalla response2) {
+                            HashMap<String, Object> parentObject = new HashMap<>();
+                            parentObject.put("objectId", response2.getObjectId());
 
                             Backendless.Data.of("ModeloxTalla").addRelation(parentObject,
                                     "modelo_link", "modelo='" + modelo + "'", new AsyncCallback<Integer>() {
                                         @Override
                                         public void handleResponse(Integer response) {
                                             Utils.showToast(getApplicationContext(), "Se creó la relacion");
+                                            MRoomTallaCantidad mRoomTallaCantidad = new MRoomTallaCantidad();
+                                            mRoomTallaCantidad.setModelo(modelo);
+                                            mRoomTallaCantidad.setCantidad(response2.getCantidad());
+                                            mRoomTallaCantidad.setTalla(response2.getTalla());
+                                            insertSQLTallaCantidad(mRoomTallaCantidad);
+                                            progressBar.setVisibility(View.GONE);
                                             disableViews(false);
                                         }
 
                                         @Override
                                         public void handleFault(BackendlessFault fault) {
                                             Utils.showToast(getApplicationContext(), "No se creó la relacion :" + fault.getMessage());
+                                            progressBar.setVisibility(View.GONE);
                                             disableViews(false);
                                         }
                                     });
@@ -256,5 +271,54 @@ public class AgregarStock extends AppCompatActivity {
             spinnerCantidad.setEnabled(true);
         }
 
+    }
+
+
+    public void insertSQLTallaCantidad(MRoomTallaCantidad mRoomTallaCantidad) {
+        new TaskInsertTallaCantidad().execute(mRoomTallaCantidad);
+    }
+
+    public class TaskInsertTallaCantidad extends AsyncTask<MRoomTallaCantidad, Void, Void> {
+        @Override
+        protected Void doInBackground(MRoomTallaCantidad... mRoomTallaCantidads) {
+            long id = GuantesDataBase.newInstance3(AgregarStock.this).getGuantesInfoDao().insertTallaCantidad(mRoomTallaCantidads[0]);
+            if (id > -1) {
+                System.out.println("Se guardó en tabla TallaCantidad");
+            } else {
+                System.out.println("No se guardó en tabla TallaCantidad");
+            }
+            return null;
+        }
+
+    }
+
+    public void updateSQLTallaCantidad(MRoomTallaCantidad mRoomTallaCantidad) {
+        new TaskUpdateTallaCantidad().execute(mRoomTallaCantidad);
+    }
+
+    public class TaskUpdateTallaCantidad extends AsyncTask<MRoomTallaCantidad, Void, Void> {
+        @Override
+        protected Void doInBackground(MRoomTallaCantidad... mRoomTallaCantidads) {
+            String modelo = mRoomTallaCantidads[0].getModelo();
+            String talla = mRoomTallaCantidads[0].getTalla();
+            int cantidad = mRoomTallaCantidads[0].getCantidad();
+            MRoomTallaCantidad mRoomTallaCantidadToUpdate = null;
+            List<MRoomTallaCantidad> listmRoomTallaCantidad = GuantesDataBase.newInstance3(AgregarStock.this).getGuantesInfoDao().getIdTallaCantidad();
+            if (listmRoomTallaCantidad != null && listmRoomTallaCantidad.size() > 0) {
+                for (MRoomTallaCantidad eachModelTallaCantidad : listmRoomTallaCantidad) {
+                    if (modelo.equalsIgnoreCase(eachModelTallaCantidad.getModelo())
+                            && talla.equalsIgnoreCase(eachModelTallaCantidad.getTalla())) {
+                        mRoomTallaCantidadToUpdate = eachModelTallaCantidad;
+                        mRoomTallaCantidadToUpdate.setCantidad(cantidad);
+                        break;
+                    }
+                }
+                if (mRoomTallaCantidadToUpdate != null) {
+                    GuantesDataBase.newInstance3(AgregarStock.this).getGuantesInfoDao().updateTallaCantidad(mRoomTallaCantidadToUpdate);
+                }
+
+            }
+            return null;
+        }
     }
 }

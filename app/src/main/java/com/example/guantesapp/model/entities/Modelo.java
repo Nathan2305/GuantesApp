@@ -1,12 +1,15 @@
 package com.example.guantesapp.model.entities;
 
 
+import java.util.Date;
+
 public class Modelo extends Guante {
 
     private String objectId;
+    private Date created;
     private String modelo;
     private String foto_url;
-
+    private boolean isChecked;
     public Modelo(String modelo) {
         this.modelo = modelo;
     }
@@ -37,5 +40,22 @@ public class Modelo extends Guante {
 
     public void setFoto_url(String foto_url) {
         this.foto_url = foto_url;
+    }
+
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
     }
 }

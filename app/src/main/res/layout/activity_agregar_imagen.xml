@@ -108,15 +108,14 @@
             android:text="Agregar Modelo" />
     </LinearLayout>
 
-    <com.github.ybq.android.spinkit.SpinKitView
+    <ProgressBar
         android:id="@+id/progress"
-        style="@style/SpinKitView.FadingCircle"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_margin="20dp"
         android:backgroundTint="@color/translucent"
-        android:visibility="gone"
-        app:SpinKit_Color="@color/naranaja"
+        android:visibility="invisible"
+        android:indeterminateDrawable="@drawable/progress_icon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.454"

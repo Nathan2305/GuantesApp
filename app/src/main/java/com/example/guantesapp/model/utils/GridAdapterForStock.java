@@ -1,6 +1,7 @@
 package com.example.guantesapp.model.utils;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,17 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+
+import com.backendless.Backendless;
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
+import com.backendless.persistence.DataQueryBuilder;
 import com.example.guantesapp.R;
 import com.example.guantesapp.model.entities.Modelo;
+import com.example.guantesapp.model.entities.ModeloxTalla;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
@@ -19,13 +28,11 @@ import it.sephiroth.android.library.picasso.Picasso;
 public class GridAdapterForStock extends BaseAdapter {
     Context context;
     List<Modelo> listaModelos;
-    List<String> modeloUrl;
-    String fromWhere;
 
-    public GridAdapterForStock(Context context, List<Modelo> listaModelos/*, List<String> modeloUrl*/) {
+
+    public GridAdapterForStock(Context context, List<Modelo> listaModelos) {
         this.context = context;
         this.listaModelos = listaModelos;
-        //this.modeloUrl = modeloUrl;
     }
 
     @Override
@@ -44,29 +51,42 @@ public class GridAdapterForStock extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolderGridview viewHoldernew;
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return super.getViewTypeCount();
+    }
+
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        ViewHolder viewHoldernew;
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.container_consulta, null);
-            viewHoldernew = new ViewHolderGridview();
+            convertView = LayoutInflater.from(context).inflate(R.layout.container_consulta, parent,false);
+            viewHoldernew = new ViewHolder();
             viewHoldernew.fotoFound = convertView.findViewById(R.id.fotoFound);
-           /* viewHoldernew.tallaFound = convertView.findViewById(R.id.tallaFound);
-            viewHoldernew.cantidadFound = convertView.findViewById(R.id.cantidadFound);*/
+            viewHoldernew.cantidad = convertView.findViewById(R.id.cantidad);
+            //viewHoldernew.nom_modelo = convertView.findViewById(R.id.nom_modelo);
+            viewHoldernew.card = convertView.findViewById(R.id.card);
             convertView.setTag(viewHoldernew);
         } else {
-            viewHoldernew = (ViewHolderGridview) convertView.getTag();
+            viewHoldernew = (ViewHolder) convertView.getTag();
         }
-        /*if (modeloUrl == null && listaModelos != null) {
-            Picasso.with(context).load(listaModelos.get(position).getFoto_url()).into(viewHoldernew.fotoFound);
-        } else {
-            Picasso.with(context).load(modeloUrl.get(position)).into(viewHoldernew.fotoFound);
-        }*/
         Picasso.with(context).load(listaModelos.get(position).getFoto_url()).into(viewHoldernew.fotoFound);
+        viewHoldernew.nom_modelo.setText(listaModelos.get(position).getModelo());
         return convertView;
     }
 
 
-    static class ViewHolderGridview {
+    public class ViewHolder {
+        CardView card;
         ImageView fotoFound;
+        TextView cantidad, nom_modelo;
+
     }
+
+
 }
