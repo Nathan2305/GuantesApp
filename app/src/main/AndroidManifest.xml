@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.guantesapp">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -13,20 +13,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
         <activity
-            android:name=".model.ui.activities.ActivityVenta"></activity>
+            android:name=".model.ui.activities.ActivityVenta"
+            android:label="Registrar venta" />
         <activity
             android:name=".model.ui.activities.AgregarModelo"
-            android:label="Agregar Modelo" />
+            android:label="Agregar modelo" />
         <activity
             android:name=".model.ui.activities.AgregarStock"
-            android:label="Agregar Stock" />
+            android:label="Agregar stock" />
         <activity
             android:name=".model.ui.activities.MainActivity"
-            android:label="Consultar Modelo">
+            android:label="Consultar modelo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

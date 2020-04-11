@@ -30,12 +30,11 @@ public interface GuanteInfoDao {
     @Update
     void updateTallaCantidad(MRoomTallaCantidad mRoomTallaCantidad);
 
-    @Query("SELECT foto_url FROM MRoomUrlDB WHERE modelo=:aux_nombre")
-    String getFotoUrlByName(String aux_nombre);
+    @Query("SELECT foto_url FROM MRoomUrlDB WHERE modelo=:aux_modelo")
+    String getFotoUrlBuyModelo(String aux_modelo);
 
-
-    /*@Query("SELECT cantidad FROM MRoomTallaCantidad WHERE talla=:aux_talla")
-    String getCantidadByTalla(String aux_talla);*/
+    @Query("SELECT *FROM MRoomUrlDB")
+    List<MRoomUrlDB> getAllFotoUrl();
 
     @Insert
     long insertTallaCantidad(MRoomTallaCantidad mRoomTallaCantidad);
@@ -46,4 +45,4 @@ public interface GuanteInfoDao {
 
     @Query("SELECT cantidad FROM MRoomTallaCantidad WHERE modelo=:aux_modelo AND talla=:aux_talla")
     int getCantidad(String aux_modelo, String aux_talla);
-  }
+}

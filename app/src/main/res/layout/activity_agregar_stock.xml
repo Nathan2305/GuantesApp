@@ -7,15 +7,13 @@
     android:layout_height="match_parent"
     tools:context=".model.ui.activities.AgregarStock">
 
-    <com.github.ybq.android.spinkit.SpinKitView
+    <ProgressBar
         android:id="@+id/progress"
-        style="@style/SpinKitView.FadingCircle"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:backgroundTint="@color/translucent"
-        android:elevation="1dp"
         android:visibility="invisible"
-        app:SpinKit_Color="@color/naranaja"
+        android:indeterminateDuration="@android:integer/config_longAnimTime"
+        android:indeterminateDrawable="@drawable/progress_icon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -127,14 +125,14 @@
         </androidx.cardview.widget.CardView>
 
         <GridView
-            android:layout_margin="5dp"
             android:id="@+id/gridViewFotos"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:columnWidth="200dp"
-            android:listSelector="@drawable/states_gridview"
+            android:layout_margin="5dp"
             android:layout_weight="1"
+            android:columnWidth="200dp"
             android:gravity="center"
+            android:listSelector="@drawable/states_gridview"
             android:numColumns="2"
             android:padding="8dp">
 

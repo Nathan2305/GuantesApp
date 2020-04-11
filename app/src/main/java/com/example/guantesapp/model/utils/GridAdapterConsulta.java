@@ -58,7 +58,7 @@ public class GridAdapterConsulta extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.container_consulta, parent, false);
+            convertView = LayoutInflater.from(context).inflate(R.layout.each_modelo_consulta, parent, false);
             convertView.setTag(new ViewHolder(convertView));
         }
         viewHolder = (ViewHolder) convertView.getTag();

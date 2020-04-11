@@ -3,26 +3,40 @@ package com.example.guantesapp.model.ui.activities;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.guantesapp.model.entities.MRoomUrlDB;
 import com.example.guantesapp.model.utils.GridAdapterConsulta;
 import com.example.guantesapp.model.utils.GuantesDataBase;
+import com.facebook.share.model.ShareMessengerActionButton;
+import com.facebook.share.model.ShareMessengerGenericTemplateContent;
+import com.facebook.share.model.ShareMessengerGenericTemplateElement;
+import com.facebook.share.model.ShareMessengerMediaTemplateContent;
+import com.facebook.share.model.ShareMessengerURLActionButton;
+import com.facebook.share.widget.MessageDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -55,6 +69,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
+import it.sephiroth.android.library.picasso.Target;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -64,11 +79,15 @@ public class MainActivity extends AppCompatActivity {
     private ConstraintLayout layoutParent;
     private FloatingActionButton fab_add, fab_add_stock, fab_add_photo;
     public static List<String> listaGuantes;
-    public List<Modelo> listModelos;
-    private Button consultar;
+    private FloatingActionButton consultar;
     private GridView gridView;
     private ArrayAdapter<CharSequence> adapter_tallas;
-    private List<String> listNameShare;
+
+    public List<String> listNameModelos;
+    public List<Modelo> listModelos;
+    public List<String> listFotoUrlString;
+    public List<Bitmap> listFotoUrlBitmap;
+
     private Animation fabOpen, fabClose, rotateForward, rotateBackward, progressIcon;
     private ProgressBar progressBar;
     private boolean isOpen = false;
@@ -83,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
+        //updateUrlRoom();
         txtModelo = findViewById(R.id.txtModelo);
         checkModelos = findViewById(R.id.checkModelos);
         layoutParent = findViewById(R.id.parentConstraint);
@@ -132,10 +152,10 @@ public class MainActivity extends AppCompatActivity {
             fab_add_stock.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.celeste)));
             fab_add_photo.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.naranaja)));
             fabShare.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.verdeBonito)));
+            consultar.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.azulito)));
+            // progressBar.setMaxCardElevation;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            //progress.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.translucent)));
-        }
+
         fab_add_stock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,12 +178,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-       /* fabShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SaveBitmap();
-            }
-        });*/
         consultar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,7 +212,8 @@ public class MainActivity extends AppCompatActivity {
                     public void handleResponse(final List<Modelo> responseModel) {
                         if (responseModel.size() > 0) {
                             listModelos = responseModel;
-                            listNameShare = new ArrayList<>();
+                            listNameModelos = new ArrayList<>();
+                            listFotoUrlString = new ArrayList<>();
                             adapterConsulta = new GridAdapterConsulta(MainActivity.this, listModelos);
                             gridView.setAdapter(adapterConsulta);
                         } else {
@@ -223,21 +238,25 @@ public class MainActivity extends AppCompatActivity {
         gridView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
             @Override
             public void onItemCheckedStateChanged(android.view.ActionMode mode, int position, long id, boolean checked) {
-                count++;
+                Modelo modelo = listModelos.get(position);
+                if (modelo.isChecked()) {
+                    modelo.setChecked(false);
+                    count--;
+                    if (listNameModelos.contains(modelo.getModelo())) {
+                        listNameModelos.remove(modelo.getModelo());
+                    }
+                } else {
+                    modelo.setChecked(true);
+                    count++;
+                    listNameModelos.add((String) adapterConsulta.getItem(position));
+                }
                 if (count > 1) {
                     mode.setTitle(count + " Guantes");
                 } else {
                     mode.setTitle(count + " Guante");
                 }
-                Modelo modelo = listModelos.get(position);
-                if (modelo.isChecked()) {
-                    modelo.setChecked(false);
-                } else {
-                    modelo.setChecked(true);
-                }
                 listModelos.get(position).setChecked(modelo.isChecked());
                 adapterConsulta.updateRecords(listModelos);
-                listNameShare.add((String) adapterConsulta.getItem(position));
             }
 
             @Override
@@ -254,6 +273,69 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(android.view.ActionMode mode, MenuItem item) {
+                if (item.getItemId() == R.id.share) {
+                    if (!listNameModelos.isEmpty()) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        DataQueryBuilder dataQueryBuilder = DataQueryBuilder.create();
+                        dataQueryBuilder.setPageSize(listNameModelos.size());
+                        for (int x = 0; x < listNameModelos.size(); x++) {
+                            stringBuilder.append(" modelo ='" + listNameModelos.get(x) + "'");
+                            if (x != listNameModelos.size() - 1) {
+                                stringBuilder.append(" or ");
+                            }
+                        }
+                        dataQueryBuilder.setWhereClause(stringBuilder.toString());
+                        Backendless.Data.of(Modelo.class).find(dataQueryBuilder, new AsyncCallback<List<Modelo>>() {
+                            @Override
+                            public void handleResponse(List<Modelo> response) {
+                                if (response.size() > 0) {
+                                    listFotoUrlBitmap = new ArrayList<>();
+                                    for (Modelo modelo : response) {
+                                        Picasso.with(MainActivity.this).load(modelo.getFoto_url()).into(new Target() {
+                                            @Override
+                                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
+                                                listFotoUrlBitmap.add(bitmap);
+                                            }
+
+                                            @Override
+                                            public void onBitmapFailed(Drawable drawable) {
+
+                                            }
+
+                                            @Override
+                                            public void onPrepareLoad(Drawable drawable) {
+
+                                            }
+                                        });
+                                        listFotoUrlString.add(modelo.getFoto_url());
+                                    }
+                                    SaveBitmap();
+                                } else {
+                                    System.out.println("No hay modelos");
+                                }
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault fault) {
+                                System.out.println("No hay modelos agregados");
+                            }
+                        });
+                    }
+                } else if (item.getItemId() == R.id.select) {
+                    for (Modelo each_modelo : listModelos) {
+                        if (!each_modelo.isChecked()) {
+                            each_modelo.setChecked(true);
+                            listNameModelos.add(each_modelo.getModelo());
+                            count++;
+                        }
+                    }
+                    adapterConsulta.updateRecords(listModelos);
+                    if (count > 1) {
+                        mode.setTitle(count + " Guantes");
+                    } else {
+                        mode.setTitle(count + " Guante");
+                    }
+                }
                 return false;
             }
 
@@ -266,96 +348,45 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 adapterConsulta.updateRecords(listModelos);
+                listNameModelos.clear();
             }
         });
-
-
     }
 
-
-
-
-
-   /* private void SaveBitmap() {
+    private void SaveBitmap() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionWrite();
         } else {
-            if (listImagesPositionChecked.size() > 0) {
-                if (listImagesPositionChecked.size() <= 1) {
-                    Drawable mDrawable = listImagesPositionChecked.get(0);
-                    Bitmap mBitmap = ((BitmapDrawable) mDrawable).getBitmap();
-                    try {
-
-                        String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), mBitmap, "modeloX", "Guante Orbit");
+            Intent shareIntent;
+            if (listFotoUrlBitmap.size() > 0) {
+                shareIntent = new Intent();
+                try {
+                    if (listFotoUrlBitmap.size() <= 1) {
+                        Bitmap bitmap = listFotoUrlBitmap.get(0);
+                        String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), bitmap, "modeloX", "Guante Orbit");
                         Uri uri = Uri.parse(path);
-
-                        Intent shareIntent = new Intent();
                         shareIntent.setAction(Intent.ACTION_SEND);
                         shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-                        shareIntent.setType("image/jpeg");
-                        startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.app_name)));
-
-                    } catch (Exception e) {
-                        System.out.println("Excepcion bitmap -" + e.getMessage());
+                    } else {
+                        ArrayList<Uri> imageUris = new ArrayList<>();
+                        for (Bitmap bitmap : listFotoUrlBitmap) {
+                            String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), bitmap, "modeloX", "Guante Orbit");
+                            Uri uri = Uri.parse(path);
+                            imageUris.add(uri); // Add your image URIs here
+                        }
+                        shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+                        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
                     }
-                } else {
-                    ArrayList<Uri> imageUris = new ArrayList<>();
-                    for (Drawable drawable : listImagesPositionChecked) {
-                        Bitmap mBitmap = ((BitmapDrawable) drawable).getBitmap();
-                        String path = MediaStore.Images.Media.insertImage(this.getContentResolver(), mBitmap, "modeloX", "Guante Orbit");
-                        Uri uri = Uri.parse(path);
-                        imageUris.add(uri); // Add your image URIs here
-
-                    }
-                    Intent shareIntent = new Intent();
-                    shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                    shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
-                    shareIntent.setType("image/*");
+                    shareIntent.setType("image/jpeg");
                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.app_name)));
+                } catch (Exception e) {
+                    Utils.showToast(MainActivity.this, "Excepcion bitmap -" + e.getMessage());
                 }
             } else {
                 Utils.showToast(this, "Selecciona al menos una imagen para compartir");
             }
         }
-    }*/
-
-
-
-
-   /* private ActionMode.Callback mActionModelCallBack = new ActionMode.Callback() {
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mode.getMenuInflater().inflate(R.menu.menu_other_options, menu);
-            mode.setTitle("Choose Other Options");
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.search:
-                    Utils.showToast(getApplicationContext(), "SELECTED SEARCH");
-                    mode.finish();
-                    return true;
-                case R.id.add:
-                    Utils.showToast(getApplicationContext(), "SELECTED ADD");
-                    mode.finish();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            mActionMode = null;
-        }
-    };*/
+    }
 
     private void requestPermissionWrite() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL);
@@ -365,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_WRITE_EXTERNAL) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // SaveBitmap();
+                SaveBitmap();
             }
         }
     }
@@ -381,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
                     for (Guante guante : response) {
                         listaGuantes.add(guante.getName());
                     }
-                    ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
+                    ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(MainActivity.this, R.layout.spinner_item, listaGuantes);
                     adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     sp_modelo.setAdapter(adapter_modelos);
                 } else {

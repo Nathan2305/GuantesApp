@@ -65,7 +65,7 @@ public class ActivityVenta extends AppCompatActivity {
         spCantidad.setAdapter(adapter_cantidad);
 
         if (listaGuantes != null) {
-            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
+            ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(this, R.layout.spinner_item, listaGuantes);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spModelo.setAdapter(adapter_modelos);
         }
@@ -139,7 +139,7 @@ public class ActivityVenta extends AppCompatActivity {
             @Override
             public void handleResponse(List<Modelo> response) {
                 if (!response.isEmpty()) {
-                    GridAdapterForStock gridAdapter = new GridAdapterForStock(getApplicationContext(), response);
+                    GridAdapterForStock gridAdapter = new GridAdapterForStock(ActivityVenta.this, response);
                     gridView.setAdapter(gridAdapter);
                     progressBar.setVisibility(View.INVISIBLE);
                     gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -61,8 +61,6 @@ public class AgregarStock extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_agregar_stock);
         progressBar = findViewById(R.id.progress);
-        FadingCircle fadingCircle = new FadingCircle();
-        progressBar.setProgressDrawable(fadingCircle);
         layoutParent = findViewById(R.id.layoutParent);
         addStock = findViewById(R.id.addStock);
         spinnerModelo = findViewById(R.id.sp_modelo2);
@@ -70,7 +68,7 @@ public class AgregarStock extends AppCompatActivity {
         spinnerCantidad = findViewById(R.id.sp_cantidad2);
         gridViewModelos = findViewById(R.id.gridViewFotos);
         if (listaGuantes != null) {
-            final ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner_item, listaGuantes);
+            final ArrayAdapter<String> adapter_modelos = new ArrayAdapter<>(AgregarStock.this, R.layout.spinner_item, listaGuantes);
             adapter_modelos.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerModelo.setAdapter(adapter_modelos);
         }
@@ -210,7 +208,7 @@ public class AgregarStock extends AppCompatActivity {
             @Override
             public void handleResponse(List<Modelo> response) {
                 if (!response.isEmpty()) {
-                    final GridAdapterForStock gridAdapter = new GridAdapterForStock(getApplicationContext(), response);
+                    final GridAdapterForStock gridAdapter = new GridAdapterForStock(AgregarStock.this, response);
                     gridViewModelos.setAdapter(gridAdapter);
                     progressBar.setVisibility(View.GONE);
                     gridViewModelos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
