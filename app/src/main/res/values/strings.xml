@@ -29,7 +29,6 @@
 
 
     <string-array name="cantidad">
-        <item></item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
@@ -54,7 +53,6 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="cantidad">Cantidad:</string>
     <string name="share">Share</string>
     <string name="todos_los_modelos">Todos los modelos</string>
     <string name="talla">Talla</string>
@@ -63,4 +61,6 @@
     <string name="nuevo_modelo">Nuevo Modelo:</string>
     <string name="agregar_modelo">Agregar Modelo</string>
     <string name="select">Select</string>
+    <string name="cantidad">Cantidad:</string>
+    <string name="confirmar_venta">Confirmar Venta</string>
 </resources>

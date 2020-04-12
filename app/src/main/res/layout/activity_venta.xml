@@ -37,7 +37,8 @@
 
                 <ImageView
                     android:layout_width="100dp"
-                    android:layout_height="100dp" />
+                    android:layout_height="100dp"
+                    tools:ignore="ContentDescription" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -45,7 +46,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="5dp">
+                    android:padding="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -56,7 +57,7 @@
                             style="@style/txtViewGral"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Modelo:" />
+                            android:text="@string/modelo" />
 
                         <Spinner
                             android:id="@+id/spModelo"
@@ -75,13 +76,13 @@
                             style="@style/txtViewGral"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Talla:" />
+                            android:text="@string/talla" />
 
                         <Spinner
                             android:id="@+id/spTalla"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="34dp"
+                            android:layout_marginStart="34dp"
                             android:textAlignment="center" />
                     </LinearLayout>
 
@@ -94,13 +95,13 @@
                             style="@style/txtViewGral"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cantidad:" />
+                            android:text="@string/cantidad" />
 
                         <Spinner
                             android:id="@+id/spCantidad"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="9dp"
+                            android:layout_marginStart="9dp"
                             android:textAlignment="center" />
                     </LinearLayout>
 
@@ -127,7 +128,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:text="Confirmar Venta" />
+            android:text="@string/confirmar_venta" />
     </LinearLayout>
 
 
