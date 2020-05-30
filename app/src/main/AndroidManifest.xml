@@ -13,6 +13,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".model.ui.activities.ResumenGuantesActivity" />
+        <activity
+            android:name=".model.ui.activities.ChatActivity"
+            android:windowSoftInputMode="stateHidden" />
+
+        <receiver
+            android:name=".model.utils.BroadCastRestartService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".model.ui.activities.ChatActivity$MyBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".model.utils.ChatListenerService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".model.ui.activities.ListUsersChatActivity"
+            android:label="Usuarios" />
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -31,6 +55,7 @@
             android:label="Consultar modelo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

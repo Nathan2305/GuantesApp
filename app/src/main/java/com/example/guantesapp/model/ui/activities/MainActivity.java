@@ -1,7 +1,7 @@
 package com.example.guantesapp.model.ui.activities;
 
 import android.Manifest;
-import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,13 +10,16 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.backendless.messaging.PublishMessageInfo;
+import com.backendless.rt.messaging.Channel;
+import com.backendless.rt.messaging.MessageInfoCallback;
+import com.example.guantesapp.model.utils.ChatListenerService;
 import com.example.guantesapp.model.utils.GridAdapterConsulta;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -52,12 +55,13 @@ import com.example.guantesapp.R;
 import com.example.guantesapp.model.utils.Utils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import it.sephiroth.android.library.picasso.Picasso;
 import it.sephiroth.android.library.picasso.Target;
+
+import static com.example.guantesapp.model.utils.Utils.CHANNEL_NAME;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -84,12 +88,15 @@ public class MainActivity extends AppCompatActivity {
     boolean allModelos = false;
     GridAdapterConsulta adapterConsulta = null;
     int count = 0;
+    public static Channel CHANNEL = null;
+    public static MessageInfoCallback callback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Backendless.initApp(getApplicationContext(), Utils.APPLICATION_ID, Utils.BACKENDLESS_KEY);
+        CHANNEL = Backendless.Messaging.subscribe(CHANNEL_NAME);
         txtModelo = findViewById(R.id.txtModelo);
         checkModelos = findViewById(R.id.checkModelos);
         layoutParent = findViewById(R.id.parentConstraint);
@@ -333,10 +340,26 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+        if (!isMyServiceRunning(ChatListenerService.class)) {
+            startService(new Intent(MainActivity.this, ChatListenerService.class));
+        }
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        boolean val = false;
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                val = true;
+                break;
+            }
+        }
+        return val;
     }
 
     private void SaveBitmap() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED) {
             requestPermissionWrite();
         } else {
             Intent shareIntent;
@@ -369,6 +392,7 @@ public class MainActivity extends AppCompatActivity {
                         shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
                         shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris);
                     }
+
                     shareIntent.setType("image/jpeg");
                     startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.app_name)));
                 } catch (Exception e) {
@@ -417,29 +441,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static ArrayList<String> getImagesPath(Activity activity) {
-        Uri uri;
-        ArrayList<String> listOfAllImages = new ArrayList<>();
-        Cursor cursor;
-        int title, description;
-        String title_;
-        String description_;
-        uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        String[] projection = {MediaStore.Images.Media.TITLE, MediaStore.Images.Media.DISPLAY_NAME};
-
-        cursor = activity.getContentResolver().query(uri, projection, null, null, null);
-
-        title = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE);
-        description = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
-        //column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.TITLE);
-        while (cursor.moveToNext()) {
-            title_ = cursor.getString(title);
-            description_ = cursor.getString(description);
-            System.out.println("Title :" + title_ + " - " + "Description :" + description_);
-        }
-        return listOfAllImages;
-    }
 
     public void getAllModelos() {
         DataQueryBuilder db = DataQueryBuilder.create();
@@ -521,24 +522,15 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sell:
                 startActivity(new Intent(this, ActivityVenta.class));
-            default:
-                return super.onOptionsItemSelected(item);
+                break;
+            case R.id.chat:
+                startActivity(new Intent(this, ListUsersChatActivity.class));
+                break;
+            case R.id.resumen:
+                startActivity(new Intent(this, ResumenGuantesActivity.class));
         }
-
+        return super.onOptionsItemSelected(item);
     }
 
-    public boolean existeBitmap(Cursor cursor, String titleBitmap) {
-        boolean val = false;
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String titleExternal = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.TITLE));
-                if (titleBitmap.equalsIgnoreCase(titleExternal)) {
-                    val = true;
-                    break;
-                }
-            }
-        }
-        return val;
-    }
 
 }

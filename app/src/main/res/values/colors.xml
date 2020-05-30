@@ -5,12 +5,13 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="colorBtnSelected">#CBFF3BEB</color>
-    <color name="naranaja">#F8970A</color>
+    <color name="naranaja">#A1F8970A</color>
     <color name="celesteClaro">#AAE4F8</color>
     <color name="celeste">#84C8FC</color>
     <color name="translucent">#0000ffff</color>
     <color name="blanco">#FFFFFF</color>
     <color name="verdeBonito">#84F5A1</color>
     <color name="azulito">#317EF3</color>
+    <color name="bground">#EDFBFF93</color>
 
 </resources>

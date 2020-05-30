@@ -9,6 +9,8 @@ import androidx.room.Update;
 import com.example.guantesapp.model.entities.MRoomDB;
 import com.example.guantesapp.model.entities.MRoomTallaCantidad;
 import com.example.guantesapp.model.entities.MRoomUrlDB;
+import com.example.guantesapp.model.entities.UserChatRoom;
+import com.example.guantesapp.model.entities.UserMessageChatRoom;
 
 import java.util.List;
 
@@ -45,4 +47,29 @@ public interface GuanteInfoDao {
 
     @Query("SELECT cantidad FROM MRoomTallaCantidad WHERE modelo=:aux_modelo AND talla=:aux_talla")
     int getCantidad(String aux_modelo, String aux_talla);
+
+    @Insert
+    long insertUserChat(UserChatRoom userChatRoom);
+
+    @Insert
+    long insertMessageUserChat(UserMessageChatRoom userMessageChatRoom);
+
+
+    @Query("SELECT *FROM USERCHATROOM")
+    List<UserChatRoom> getUsersChatRoom();
+
+    @Query("SELECT *FROM UserMessageChatRoom")
+    List<UserMessageChatRoom> getMessagesUserChat();
+
+    @Query("SELECT email FROM UserChatRoom WHERE email=:aux_email")
+    String getEmail(String aux_email);
+
+    @Query("SELECT *FROM USERMESSAGECHATROOM WHERE statusChat=:b")
+    List<UserMessageChatRoom> getListMessagePerStatus(boolean b);
+
+    @Update
+    void updateMessage(UserMessageChatRoom userMessageChatRoom);
+
+    @Query("SELECT *FROM UserMessageChatRoom WHERE identifier=:identifier")
+    List<UserMessageChatRoom> getAllMessagesFromUser(String identifier);
 }

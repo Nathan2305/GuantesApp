@@ -2,8 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/resumen"
+        android:icon="@drawable/ic_money"
+        android:title="Money"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/sell"
         android:icon="@drawable/ic_saleicon"
         android:title="sell"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/chat"
+        android:icon="@drawable/ic_message"
+        android:title="Chat"
+        app:showAsAction="ifRoom" />
+
+
+
+
+
+
+
+
+
 </menu>

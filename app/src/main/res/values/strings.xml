@@ -63,4 +63,6 @@
     <string name="select">Select</string>
     <string name="cantidad">Cantidad:</string>
     <string name="confirmar_venta">Confirmar Venta</string>
+    <string name="escribe_el_mensaje">Escribe el mensaje..</string>
+    <string name="other">adjuntar</string>
 </resources>
